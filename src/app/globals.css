@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --font-geist-sans: 'Geist', sans-serif;
+  --font-geist-mono: 'Geist Mono', monospace;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Force dark mode styles - akan override semua yang lain */
+html.dark {
+  color-scheme: dark;
+  background-color: #111827 !important;
+  color: #f9fafb !important;
+}
+
+html.dark body {
+  background-color: #111827 !important;
+  color: #f9fafb !important;
+}
+
+/* Force semua background putih jadi dark */
+html.dark [class*="bg-white"] {
+  background-color: #1f2937 !important;
+}
+
+html.dark [class*="bg-gray-50"] {
+  background-color: #374151 !important;
+}
+
+html.dark [class*="bg-gray-100"] {
+  background-color: #374151 !important;
+}
+
+/* Force text colors */
+html.dark [class*="text-gray-900"] {
+  color: #f9fafb !important;
+}
+
+html.dark [class*="text-gray-600"] {
+  color: #d1d5db !important;
+}
+
+/* Force border colors */
+html.dark [class*="border-gray-200"] {
+  border-color: #374151 !important;
+}
+
+html.dark [class*="border-gray-300"] {
+  border-color: #4b5563 !important;
+}
