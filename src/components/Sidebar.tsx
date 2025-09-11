@@ -3,6 +3,42 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
+// CSS Animation for blinking badges (same as header notification)
+const blinkingBadgeStyles = `
+  @keyframes blinkNotification {
+    0%, 50% { 
+      opacity: 1; 
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    25% { 
+      transform: scale(1.2);
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.3);
+    }
+    51%, 100% { 
+      opacity: 0.6; 
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+  }
+  
+  .notification-blink {
+    animation: blinkNotification 2s ease-in-out infinite;
+    background-color: #10b981 !important;
+  }
+`;
+
+// Inject styles into document head
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.type = 'text/css';
+  styleSheet.innerText = blinkingBadgeStyles;
+  if (!document.head.querySelector('style[data-sidebar-badges]')) {
+    styleSheet.setAttribute('data-sidebar-badges', 'true');
+    document.head.appendChild(styleSheet);
+  }
+}
+
 const Sidebar = () => {
   const [activeMenu, setActiveMenu] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -215,6 +251,141 @@ const Sidebar = () => {
             </li>
           </ul> 
         </div>
+
+        {/* MAIN MENU Section */}
+        <div className="mb-6">
+          <div 
+            style={{
+              color: isDarkMode ? '#94a3b8' : '#6b7280'
+            }}
+            className="text-xs font-semibold uppercase tracking-wider mb-3 px-2"
+          >
+            MAIN MENU
+          </div>
+          
+          <ul className="space-y-1">
+            {/* Portal Aplikasi */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('Portal Aplikasi')}
+                style={{
+                  backgroundColor: activeMenu === 'Portal Aplikasi' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Portal Aplikasi' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'Portal Aplikasi') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'Portal Aplikasi') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <div className="flex items-center space-x-3">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  <span>Portal Aplikasi</span>
+                </div>
+                <div 
+                  className="w-2 h-2 rounded-full notification-blink"
+                  style={{ backgroundColor: '#10b981' }}
+                ></div>
+              </button>
+            </li>
+
+            {/* Kujang AI */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('Kujang AI')}
+                style={{
+                  backgroundColor: activeMenu === 'Kujang AI' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Kujang AI' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'Kujang AI') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'Kujang AI') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <span>Kujang AI</span>
+              </button>
+            </li>
+
+            {/* Library */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('Library')}
+                style={{
+                  backgroundColor: activeMenu === 'Library' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Library' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'Library') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'Library') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span>Library</span>
+              </button>
+            </li>
+
+            {/* Shortlink */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('Shortlink')}
+                style={{
+                  backgroundColor: activeMenu === 'Shortlink' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Shortlink' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'Shortlink') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'Shortlink') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <div className="flex items-center space-x-3">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  <span>Shortlink</span>
+                </div>
+                <div 
+                  className="w-2 h-2 rounded-full notification-blink"
+                  style={{ backgroundColor: '#10b981' }}
+                ></div>
+              </button>
+            </li>
+          </ul>
+        </div>
+
         <div className="mb-6">
           <div 
             style={{
@@ -226,6 +397,60 @@ const Sidebar = () => {
           </div>
           
           <ul className="space-y-1">
+            {/* E-Prosedur */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('E-Prosedur')}
+                style={{
+                  backgroundColor: activeMenu === 'E-Prosedur' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'E-Prosedur' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'E-Prosedur') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'E-Prosedur') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <span>E-Prosedur</span>
+              </button>
+            </li>
+
+            {/* Employee Directory */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('Employee Directory')}
+                style={{
+                  backgroundColor: activeMenu === 'Employee Directory' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Employee Directory' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'Employee Directory') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'Employee Directory') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span>Employee Directory</span>
+              </button>
+            </li>
+
             {/* SIADIL */}
             <li>
               <button
