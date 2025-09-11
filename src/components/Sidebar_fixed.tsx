@@ -163,11 +163,11 @@ const Sidebar = () => {
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           style={{
-            backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
-            color: isDarkMode ? '#f1f5f9' : '#374151',
-            border: isDarkMode ? '1px solid #475569' : '1px solid #e5e7eb'
+            backgroundColor: isDarkMode ? '#ffffff' : '#ffffff',
+            color: isDarkMode ? '#374151' : '#374151',
+            border: '1px solid #e5e7eb'
           }}
-          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-opacity-80 transition-all duration-200 shadow-md"
+          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-all duration-200 shadow-md"
         >
           <svg 
             className={`w-4 h-4 transform transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
@@ -201,8 +201,8 @@ const Sidebar = () => {
             <Image
               src="/logo-demplon.png"
               alt="Demplon Logo"
-              width={60}
-              height={60}
+              width={40}
+              height={40}
               className="rounded"
             />
           )}
