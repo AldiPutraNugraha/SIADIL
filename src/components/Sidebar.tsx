@@ -95,9 +95,32 @@ const Sidebar = () => {
         transition: 'all 0.3s ease',
         width: isCollapsed ? '80px' : '240px'
       }}
-      className="h-screen shadow-sm border-r flex flex-col"
+      className="h-screen shadow-sm border-r flex flex-col group relative"
     >
-      {/* Header with Logo and Collapse Button */}
+      {/* Collapse/Expand Button - Positioned on the border */}
+      <div className="absolute top-4 -right-4 z-10 group-hover:block hidden">
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          style={{
+            backgroundColor: isDarkMode ? '#ffffff' : '#ffffff',
+            color: isDarkMode ? '#374151' : '#374151',
+            border: '1px solid #e5e7eb'
+          }}
+          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-all duration-200 shadow-md"
+        >
+          <svg 
+            className={`w-4 h-4 transform transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Header with Logo */}
       <div 
         style={{
           borderColor: isDarkMode ? '#334155' : '#e5e7eb'
@@ -115,36 +138,17 @@ const Sidebar = () => {
             />
           )}
           {isCollapsed && (
-            <div className="w-12 h-12 mx-auto">
+            <div className="w-16 h-16 mx-auto">
               <Image
                 src="/logo-demplon.png"
                 alt="Demplon Logo"
-                width={48}
-                height={48}
+                width={64}
+                height={64}
                 className="rounded"
               />
             </div>
           )}
         </div>
-        
-        {/* Collapse/Expand Button */}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          style={{
-            backgroundColor: isDarkMode ? '#374151' : '#f3f4f6',
-            color: isDarkMode ? '#e5e7eb' : '#374151'
-          }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center hover:scale-110 transition-all duration-200 shadow-md"
-        >
-          <svg 
-            className={`w-4 h-4 transform transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
       </div>
 
       {/* User Profile Section */}
@@ -677,33 +681,33 @@ const Sidebar = () => {
               </button>
             </li>
 
-            {/* Dokumentu */}
+            {/* Dokumenku */}
             <li>
               <button
-                onClick={() => setActiveMenu('Dokumentu')}
+                onClick={() => setActiveMenu('Dokumenku')}
                 style={{
-                  backgroundColor: activeMenu === 'Dokumentu' ? '#01793b' : 'transparent',
-                  color: activeMenu === 'Dokumentu' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                  backgroundColor: activeMenu === 'Dokumenku' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Dokumenku' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
                 }}
                 className={`w-full flex items-center transition-colors text-sm rounded-md ${
                   isCollapsed ? 'justify-center px-2 py-2' : 'space-x-3 px-3 py-2'
                 }`}
                 onMouseEnter={(e) => {
-                  if (activeMenu !== 'Dokumentu') {
+                  if (activeMenu !== 'Dokumenku') {
                     e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (activeMenu !== 'Dokumentu') {
+                  if (activeMenu !== 'Dokumenku') {
                     e.currentTarget.style.backgroundColor = 'transparent';
                   }
                 }}
-                title={isCollapsed ? 'Dokumentu' : ''}
+                title={isCollapsed ? 'Dokumenku' : ''}
               >
                 <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                {!isCollapsed && <span>Dokumentu</span>}
+                {!isCollapsed && <span>Dokumenku</span>}
               </button>
             </li>
 
