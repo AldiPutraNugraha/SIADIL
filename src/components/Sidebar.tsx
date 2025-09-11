@@ -417,10 +417,10 @@ const Sidebar = () => {
                   }
                 }}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
-                <span>E-Prosedur</span>
+                <span className="text-left">E-Prosedur</span>
               </button>
             </li>
 
@@ -444,10 +444,10 @@ const Sidebar = () => {
                   }
                 }}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                <span>Employee Directory</span>
+                <span className="text-left">Employee Directory</span>
               </button>
             </li>
 
@@ -475,6 +475,169 @@ const Sidebar = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span>SIADIL</span>
+              </button>
+            </li>
+
+            {/* SYSTIK */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('SYSTIK')}
+                style={{
+                  backgroundColor: activeMenu === 'SYSTIK' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'SYSTIK' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'SYSTIK') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'SYSTIK') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                <span>SYSTIK</span>
+              </button>
+            </li>
+
+            {/* Konsumsi */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('Konsumsi')}
+                style={{
+                  backgroundColor: activeMenu === 'Konsumsi' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Konsumsi' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'Konsumsi') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'Konsumsi') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <span>Konsumsi</span>
+              </button>
+            </li>
+
+            {/* Dokumentu */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('Dokumentu')}
+                style={{
+                  backgroundColor: activeMenu === 'Dokumentu' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Dokumentu' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'Dokumentu') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'Dokumentu') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Dokumentu</span>
+              </button>
+            </li>
+
+            {/* MyStatement */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('MyStatement')}
+                style={{
+                  backgroundColor: activeMenu === 'MyStatement' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'MyStatement' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'MyStatement') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'MyStatement') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>MyStatement</span>
+              </button>
+            </li>
+
+            {/* Work Area */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('Work Area')}
+                style={{
+                  backgroundColor: activeMenu === 'Work Area' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Work Area' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'Work Area') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'Work Area') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="text-left">Work Area</span>
+              </button>
+            </li>
+
+            {/* Peraturan Perundangan */}
+            <li>
+              <button
+                onClick={() => setActiveMenu('Peraturan Perundangan')}
+                style={{
+                  backgroundColor: activeMenu === 'Peraturan Perundangan' ? '#01793b' : 'transparent',
+                  color: activeMenu === 'Peraturan Perundangan' ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 transition-colors text-sm rounded-md"
+                onMouseEnter={(e) => {
+                  if (activeMenu !== 'Peraturan Perundangan') {
+                    e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeMenu !== 'Peraturan Perundangan') {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span className="text-left">Peraturan Perundangan</span>
               </button>
             </li>
           </ul>
