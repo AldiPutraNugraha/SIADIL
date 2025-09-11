@@ -26,6 +26,29 @@ const blinkingBadgeStyles = `
     animation: blinkNotification 2s ease-in-out infinite;
     background-color: #10b981 !important;
   }
+
+  .sidebar-scrollable::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .sidebar-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .sidebar-scrollable::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sidebar-scrollable::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(156, 163, 175, 0.8);
+  }
+  
+  .sidebar-scrollable {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
 `;
 
 // Inject styles into document head
@@ -70,14 +93,14 @@ const Sidebar = () => {
         borderColor: isDarkMode ? '#334155' : '#e5e7eb',
         transition: 'all 0.3s ease'
       }}
-      className="w-60 min-h-screen shadow-sm border-r"
+      className="w-60 h-screen shadow-sm border-r flex flex-col"
     >
       {/* Header with Logo */}
       <div 
         style={{
           borderColor: isDarkMode ? '#334155' : '#e5e7eb'
         }}
-        className="px-4 py-4"
+        className="px-4 py-4 flex-shrink-0"
       >
         <div className="flex flex-col space-y-2">
           <Image
@@ -95,7 +118,7 @@ const Sidebar = () => {
         style={{
           borderColor: isDarkMode ? '#334155' : '#e5e7eb'
         }}
-        className="px-4 py-4"
+        className="px-4 py-4 flex-shrink-0"
       >
         <div className="flex items-center space-x-3">
           <div 
@@ -128,8 +151,9 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Navigation Menu */}
-      <nav className="px-4 py-4"> 
+      {/* Scrollable Navigation Menu */}
+      <div className="flex-1 overflow-y-auto sidebar-scrollable">
+        <nav className="px-4 py-4"> 
         {/* GENERALS Section */}
         <div className="mb-6">
           <div 
@@ -642,7 +666,8 @@ const Sidebar = () => {
             </li>
           </ul>
         </div>
-      </nav>
+        </nav>
+      </div>
     </div>
   );
 };
