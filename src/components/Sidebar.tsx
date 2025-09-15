@@ -225,7 +225,7 @@ const Sidebar = () => {
               }}
               className="w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300"
             >
-              <span className="font-semibold text-sm">DF</span>
+              <span className="font-semibold text-sm">AP</span>
             </div>
             <div className="text-center">
               <div 
@@ -234,7 +234,7 @@ const Sidebar = () => {
                 }}
                 className="font-medium text-sm"
               >
-                Difa Nugraha
+                Aldi Putra Nugraha
               </div>
               <div 
                 style={{
@@ -242,7 +242,7 @@ const Sidebar = () => {
                 }}
                 className="text-xs"
               >
-                10122059
+                10122076
               </div>
             </div>
           </div>
@@ -255,7 +255,7 @@ const Sidebar = () => {
               }}
               className="w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300"
             >
-              <span className="font-semibold text-sm">DF</span>
+              <span className="font-semibold text-sm">AP</span>
             </div>
           </div>
         )}
