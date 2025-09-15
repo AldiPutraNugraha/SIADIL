@@ -210,26 +210,55 @@ const Sidebar = () => {
       </div>
 
       {/* User Profile Section - Centered */}
-      <div
-        className={`${
-          isCollapsed ? "px-2" : "px-4"
-        } py-3 transition-all duration-300`}>
-        <div
-          className={`flex items-center ${
-            isCollapsed ? "justify-center" : "space-x-3"
-          }`}>
-          <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center shrink-0">
-            <span className="text-white font-semibold text-sm">DF</span>
-          </div>
-          {!isCollapsed && (
-            <div className="opacity-100 transition-opacity duration-300">
-              <div className="font-medium text-gray-900 text-sm">
-                Difa Nugraha
-              </div>
-              <div className="text-xs text-gray-600">10122059</div>
+      <div 
+        style={{
+          borderColor: isDarkMode ? '#334155' : '#e5e7eb'
+        }}
+        className="px-4 py-4 flex-shrink-0 border-b"
+      >
+        {!isCollapsed ? (
+          <div className="flex flex-col items-center space-y-2">
+            <div 
+              style={{
+                backgroundColor: isDarkMode ? '#7c2d12' : '#dc2626',
+                color: '#ffffff'
+              }}
+              className="w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300"
+            >
+              <span className="font-semibold text-sm">AP</span>
             </div>
-          )}
-        </div>
+            <div className="text-center">
+              <div 
+                style={{
+                  color: isDarkMode ? '#f1f5f9' : '#111827'
+                }}
+                className="font-medium text-sm"
+              >
+                Aldi Putra Nugraha
+              </div>
+              <div 
+                style={{
+                  color: isDarkMode ? '#94a3b8' : '#6b7280'
+                }}
+                className="text-xs"
+              >
+                10122076
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <div 
+              style={{
+                backgroundColor: isDarkMode ? '#7c2d12' : '#dc2626',
+                color: '#ffffff'
+              }}
+              className="w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300"
+            >
+              <span className="font-semibold text-sm">AP</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Scrollable Navigation Menu */}
