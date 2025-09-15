@@ -885,7 +885,7 @@ const SiadilHeaderSimple = () => {
                   fontWeight: '600'
                 }}
               >
-                DF
+                AP
               </div>
             </button>
 
@@ -920,7 +920,7 @@ const SiadilHeaderSimple = () => {
                       fontSize: '14px'
                     }}
                   >
-                    Difa Nugraha
+                    Aldi Putra Nugraha
                   </div>
                   <div 
                     style={{
@@ -929,7 +929,7 @@ const SiadilHeaderSimple = () => {
                       marginTop: '2px'
                     }}
                   >
-                    10122059
+                    10122076
                   </div>
                 </div>
 
