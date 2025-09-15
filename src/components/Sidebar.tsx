@@ -211,10 +211,7 @@ const Sidebar = () => {
 
       {/* User Profile Section - Centered */}
       <div 
-        style={{
-          borderColor: isDarkMode ? '#334155' : '#e5e7eb'
-        }}
-        className="px-4 py-4 flex-shrink-0 border-b"
+        className="px-4 py-4 flex-shrink-0"
       >
         {!isCollapsed ? (
           <div className="flex flex-col items-center space-y-2">
