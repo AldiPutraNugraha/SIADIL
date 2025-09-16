@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 // CSS Animation for blinking badges (same as header notification)
@@ -87,64 +88,76 @@ const Sidebar = () => {
     return () => observer.disconnect();
   }, []);
 
-  const MenuButton = ({ id, children, icon, hasNotification = false, title }: {
+  // Dispatch sidebar width change event
+  useEffect(() => {
+    const width = isCollapsed ? 80 : 240;
+    const event = new CustomEvent('sidebarResize', { 
+      detail: { width } 
+    });
+    window.dispatchEvent(event);
+  }, [isCollapsed]);
+
+  const MenuButton = ({ id, children, icon, hasNotification = false, title, href }: {
     id: string;
     children?: React.ReactNode;
     icon: React.ReactNode;
     hasNotification?: boolean;
     title: string;
+    href: string;
   }) => (
     <li>
-      <button
-        onClick={() => setActiveMenu(id)}
-        style={{
-          backgroundColor: activeMenu === id ? '#01793b' : 'transparent',
-          color: activeMenu === id ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
-        }}
-        className={`w-full flex items-center justify-center transition-colors text-sm rounded-md py-3 relative ${
-          isCollapsed ? 'px-2' : 'px-3'
-        }`}
-        onMouseEnter={(e) => {
-          if (activeMenu !== id) {
-            e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (activeMenu !== id) {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }
-        }}
-        title={isCollapsed ? title : ''}
-      >
-        {isCollapsed ? (
-          <>
-            <div className="w-6 h-6 flex items-center justify-center">
-              {icon}
-            </div>
-            {hasNotification && (
-              <div 
-                className="w-2 h-2 rounded-full notification-blink absolute top-1 right-1"
-                style={{ backgroundColor: '#10b981' }}
-              ></div>
-            )}
-          </>
-        ) : (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center space-x-3">
-              <div className="w-5 h-5 flex items-center justify-center">
+      <Link href={href}>
+        <button
+          onClick={() => setActiveMenu(id)}
+          style={{
+            backgroundColor: activeMenu === id ? '#01793b' : 'transparent',
+            color: activeMenu === id ? '#ffffff' : (isDarkMode ? '#cbd5e1' : '#111827')
+          }}
+          className={`w-full flex items-center justify-center transition-colors text-sm rounded-md py-3 relative ${
+            isCollapsed ? 'px-2' : 'px-3'
+          }`}
+          onMouseEnter={(e) => {
+            if (activeMenu !== id) {
+              e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(71, 85, 105, 0.3)' : 'rgba(243, 244, 246, 1)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (activeMenu !== id) {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }
+          }}
+          title={isCollapsed ? title : ''}
+        >
+          {isCollapsed ? (
+            <>
+              <div className="w-6 h-6 flex items-center justify-center">
                 {icon}
               </div>
-              <span className="text-left">{children || title}</span>
+              {hasNotification && (
+                <div 
+                  className="w-2 h-2 rounded-full notification-blink absolute top-1 right-1"
+                  style={{ backgroundColor: '#10b981' }}
+                ></div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center space-x-3">
+                <div className="w-5 h-5 flex items-center justify-center">
+                  {icon}
+                </div>
+                <span className="text-left">{children || title}</span>
+              </div>
+              {hasNotification && (
+                <div 
+                  className="w-2 h-2 rounded-full notification-blink"
+                  style={{ backgroundColor: '#10b981' }}
+                ></div>
+              )}
             </div>
-            {hasNotification && (
-              <div 
-                className="w-2 h-2 rounded-full notification-blink"
-                style={{ backgroundColor: '#10b981' }}
-              ></div>
-            )}
-          </div>
-        )}
-      </button>
+          )}
+        </button>
+      </Link>
     </li>
   );
 
@@ -278,6 +291,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Home" 
               title="Home"
+              href="/"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -288,6 +302,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Profile" 
               title="Profile"
+              href="/profile"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
@@ -298,6 +313,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Employment" 
               title="Employment"
+              href="/employment"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 515.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 919.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -308,6 +324,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Kehadiran" 
               title="Kehadiran, Koreksi, Cuti, dan Dinas"
+              href="/kehadiran"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -334,6 +351,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Portal Aplikasi" 
               title="Portal Aplikasi"
+              href="/portal-aplikasi"
               hasNotification={true}
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,6 +363,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Kujang AI" 
               title="Kujang AI"
+              href="/kujang-ai"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -355,6 +374,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Library" 
               title="Library"
+              href="/library"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -365,6 +385,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Shortlink" 
               title="Shortlink"
+              href="/shortlink"
               hasNotification={true}
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -392,6 +413,7 @@ const Sidebar = () => {
             <MenuButton 
               id="E-Prosedur" 
               title="E-Prosedur"
+              href="/e-prosedur"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -402,6 +424,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Employee Directory" 
               title="Employee Directory"
+              href="/employee-directory"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 515.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 919.288 0M15 7a3 3 0 11-6 0 3 3 0 616 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -412,6 +435,7 @@ const Sidebar = () => {
             <MenuButton 
               id="SIADIL" 
               title="SIADIL"
+              href="/siadil"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -422,6 +446,7 @@ const Sidebar = () => {
             <MenuButton 
               id="SYSTIK" 
               title="SYSTIK"
+              href="/systik"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
@@ -432,6 +457,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Konsumsi" 
               title="Konsumsi"
+              href="/konsumsi"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -442,6 +468,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Dokumenku" 
               title="Dokumenku"
+              href="/dokumenku"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -452,6 +479,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Work Area" 
               title="Work Area"
+              href="/work-area"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -463,6 +491,7 @@ const Sidebar = () => {
             <MenuButton 
               id="Peraturan Perundangan" 
               title="Peraturan Perundangan"
+              href="/peraturan-perundangan"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
