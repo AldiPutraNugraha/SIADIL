@@ -169,7 +169,7 @@ const Sidebar = () => {
         transition: 'all 0.3s ease',
         width: isCollapsed ? '80px' : '240px'
       }}
-      className="h-screen shadow-sm border-r flex flex-col group relative"
+      className="h-screen  border-r flex flex-col group relative"
     >
       {/* Collapse/Expand Button - Positioned on the border */}
       <div className="absolute top-4 -right-4 z-10 group-hover:block hidden">
