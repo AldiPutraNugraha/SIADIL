@@ -194,85 +194,87 @@ const Sidebar = () => {
         </button>
       </div>
 
-      {/* Header with Logo - Centered */}
-      <div 
-        style={{
-          borderColor: isDarkMode ? '#334155' : '#e5e7eb'
-        }}
-        className="px-4 py-6 flex-shrink-0 relative"
-      >
-        <div className="flex justify-center items-center">
+      {/* Scrollable Content - All sidebar content can scroll */}
+      <div className="flex-1 overflow-y-auto sidebar-scrollable">
+        
+        {/* Header with Logo - Centered */}
+        <div 
+          style={{
+            borderColor: isDarkMode ? '#334155' : '#e5e7eb'
+          }}
+          className="px-4 py-6"
+        >
+          <div className="flex justify-center items-center">
+            {!isCollapsed ? (
+              <Image
+                src="/logo-demplon.png"
+                alt="Demplon Logo"
+                width={120}
+                height={40}
+                className="rounded"
+              />
+            ) : (
+              <Image
+                src="/logo-demplon.png"
+                alt="Demplon Logo"
+                width={40}
+                height={40}
+                className="rounded"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* User Profile Section - Centered */}
+        <div 
+          className="px-4 py-4"
+        >
           {!isCollapsed ? (
-            <Image
-              src="/logo-demplon.png"
-              alt="Demplon Logo"
-              width={120}
-              height={40}
-              className="rounded"
-            />
+            <div className="flex flex-col items-center space-y-2">
+              <div 
+                style={{
+                  backgroundColor: isDarkMode ? '#7c2d12' : '#dc2626',
+                  color: '#ffffff'
+                }}
+                className="w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300"
+              >
+                <span className="font-semibold text-sm">AP</span>
+              </div>
+              <div className="text-center">
+                <div 
+                  style={{
+                    color: isDarkMode ? '#f1f5f9' : '#111827'
+                  }}
+                  className="font-medium text-sm"
+                >
+                  Aldi Putra Nugraha
+                </div>
+                <div 
+                  style={{
+                    color: isDarkMode ? '#94a3b8' : '#6b7280'
+                  }}
+                  className="text-xs"
+                >
+                  10122076
+                </div>
+              </div>
+            </div>
           ) : (
-            <Image
-              src="/logo-demplon.png"
-              alt="Demplon Logo"
-              width={60}
-              height={60}
-              className="rounded"
-            />
+            <div className="flex justify-center">
+              <div 
+                style={{
+                  backgroundColor: isDarkMode ? '#7c2d12' : '#dc2626',
+                  color: '#ffffff'
+                }}
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300"
+              >
+                <span className="font-semibold text-xs">AP</span>
+              </div>
+            </div>
           )}
         </div>
-      </div>
 
-      {/* User Profile Section - Centered */}
-      <div 
-        className="px-4 py-4 flex-shrink-0"
-      >
-        {!isCollapsed ? (
-          <div className="flex flex-col items-center space-y-2">
-            <div 
-              style={{
-                backgroundColor: isDarkMode ? '#7c2d12' : '#dc2626',
-                color: '#ffffff'
-              }}
-              className="w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300"
-            >
-              <span className="font-semibold text-sm">AP</span>
-            </div>
-            <div className="text-center">
-              <div 
-                style={{
-                  color: isDarkMode ? '#f1f5f9' : '#111827'
-                }}
-                className="font-medium text-sm"
-              >
-                Aldi Putra Nugraha
-              </div>
-              <div 
-                style={{
-                  color: isDarkMode ? '#94a3b8' : '#6b7280'
-                }}
-                className="text-xs"
-              >
-                10122076
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <div 
-              style={{
-                backgroundColor: isDarkMode ? '#7c2d12' : '#dc2626',
-                color: '#ffffff'
-              }}
-              className="w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300"
-            >
-              <span className="font-semibold text-sm">AP</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Scrollable Navigation Menu */}
-      <div className="flex-1 overflow-y-auto sidebar-scrollable">
+        {/* Navigation Menu */}
         <nav className="px-2 py-4"> 
         {/* GENERALS Section */}
         <div className="mb-6">
@@ -501,7 +503,7 @@ const Sidebar = () => {
           </ul>
         </div>
         </nav>
-      </div>
+      </div> {/* End of scrollable content */}
     </div>
   );
 };
