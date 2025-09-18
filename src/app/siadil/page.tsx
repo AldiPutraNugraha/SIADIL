@@ -40,12 +40,15 @@ export default function SiadilPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search Document"
-                  className="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent custom-focus-ring"
                 />
               </div>
 
               {/* Add New Document Button */}
-              <button className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200">
+              <button 
+                className="inline-flex items-center px-4 py-2 text-white font-medium rounded-lg transition-colors duration-200 hover:opacity-90"
+                style={{ backgroundColor: '#01793b' }}
+              >
                 <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
@@ -69,7 +72,7 @@ export default function SiadilPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             
             {/* Personal Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-md transition-shadow duration-200">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200">
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
@@ -93,10 +96,10 @@ export default function SiadilPage() {
             </div>
 
             {/* TIK Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-md transition-shadow duration-200">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200">
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
                     <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
                     </svg>
@@ -114,7 +117,10 @@ export default function SiadilPage() {
             </div>
 
             {/* Create New Archive Card */}
-            <div className="bg-green-600 rounded-lg p-6 cursor-pointer hover:bg-green-700 transition-colors duration-200">
+            <div 
+              className="rounded-lg p-6 cursor-pointer hover:shadow-xl transition-all duration-200 shadow-sm hover:opacity-90"
+              style={{ backgroundColor: '#01793b' }}
+            >
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 border-2 border-white rounded-lg flex items-center justify-center">
@@ -146,7 +152,7 @@ export default function SiadilPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* SSL Reminder */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="bg-red-500 rounded-lg shadow-sm border border-red-600 p-4">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
                   <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
@@ -155,15 +161,15 @@ export default function SiadilPage() {
                     </svg>
                   </div>
                 </div>
-                <div className="ml-3 flex-1">
-                  <h3 className="text-sm font-medium text-red-600">
+                <div className="ml-3 flex-1" style={{ background: 'transparent !important', backgroundColor: 'transparent !important' }}>
+                  <h3 className="text-sm font-medium text-white" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
                     SSL01
                   </h3>
-                  <p className="text-sm text-red-600 mt-1">
+                  <p className="text-sm text-white mt-1" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
                     SSL pupuk-kujang.co.id (Non GCP)
                   </p>
-                  <p className="text-xs text-red-500 mt-2">
-                    This document is expired 2 months 30 days ago
+                  <p className="text-xs text-red-100 mt-2" style={{ color: '#fecaca !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
+                    This document is expired 3 months ago
                   </p>
                 </div>
               </div>

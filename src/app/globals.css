@@ -5,6 +5,7 @@
 :root {
   --font-geist-sans: 'Geist', sans-serif;
   --font-geist-mono: 'Geist Mono', monospace;
+  --custom-green: #01793b;
 }
 
 * {
@@ -16,17 +17,29 @@ body {
   background-color: #f9fafb !important; /* gray-50 */
 }
 
-/* Prevent any white background in green cards */
-.bg-green-600,
-.bg-green-600 *,
-.bg-green-700,
-.bg-green-700 * {
+/* Custom focus ring for search input */
+.custom-focus-ring:focus {
+  --tw-ring-color: #01793b !important;
+  ring-color: #01793b !important;
+}
+
+/* Prevent any white background in custom green elements */
+[style*="#01793b"],
+[style*="#01793b"] * {
   background-color: transparent !important;
 }
 
-/* But keep the main green background */
-.bg-green-600 {
-  background-color: #16a34a !important; /* green-600 */
+/* But keep the main custom green background */
+[style*="#01793b"] {
+  background-color: #01793b !important;
+}
+
+/* Force white text in custom green elements and remove any background */
+[style*="#01793b"] .text-white,
+[style*="#01793b"] .text-white * {
+  color: white !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 .bg-green-700 {
@@ -38,6 +51,35 @@ body {
 .bg-green-600 .text-white *,
 .bg-green-700 .text-white,
 .bg-green-700 .text-white * {
+  color: white !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Prevent any white background in red cards */
+.bg-red-500,
+.bg-red-500 *,
+.bg-red-600,
+.bg-red-600 * {
+  background-color: transparent !important;
+}
+
+/* But keep the main red background */
+.bg-red-500 {
+  background-color: #ef4444 !important; /* red-500 */
+}
+
+.bg-red-600 {
+  background-color: #dc2626 !important; /* red-600 */
+}
+
+/* Force white text in red cards and remove any background */
+.bg-red-500 .text-white,
+.bg-red-500 .text-white *,
+.bg-red-500 .text-red-100,
+.bg-red-500 .text-red-100 *,
+.bg-red-600 .text-white,
+.bg-red-600 .text-white * {
   color: white !important;
   background: transparent !important;
   background-color: transparent !important;
