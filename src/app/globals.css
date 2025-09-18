@@ -11,45 +11,34 @@
   box-sizing: border-box;
 }
 
-/* Force dark mode styles - akan override semua yang lain */
-html.dark {
-  color-scheme: dark;
-  background-color: #111827 !important;
-  color: #f9fafb !important;
+/* Ensure consistent background color */
+body {
+  background-color: #f9fafb !important; /* gray-50 */
 }
 
-html.dark body {
-  background-color: #111827 !important;
-  color: #f9fafb !important;
+/* Prevent any white background in green cards */
+.bg-green-600,
+.bg-green-600 *,
+.bg-green-700,
+.bg-green-700 * {
+  background-color: transparent !important;
 }
 
-/* Force semua background putih jadi dark */
-html.dark [class*="bg-white"] {
-  background-color: #1f2937 !important;
+/* But keep the main green background */
+.bg-green-600 {
+  background-color: #16a34a !important; /* green-600 */
 }
 
-html.dark [class*="bg-gray-50"] {
-  background-color: #374151 !important;
+.bg-green-700 {
+  background-color: #15803d !important; /* green-700 */
 }
 
-html.dark [class*="bg-gray-100"] {
-  background-color: #374151 !important;
-}
-
-/* Force text colors */
-html.dark [class*="text-gray-900"] {
-  color: #f9fafb !important;
-}
-
-html.dark [class*="text-gray-600"] {
-  color: #d1d5db !important;
-}
-
-/* Force border colors */
-html.dark [class*="border-gray-200"] {
-  border-color: #374151 !important;
-}
-
-html.dark [class*="border-gray-300"] {
-  border-color: #4b5563 !important;
+/* Force white text in green archive card and remove any background */
+.bg-green-600 .text-white,
+.bg-green-600 .text-white *,
+.bg-green-700 .text-white,
+.bg-green-700 .text-white * {
+  color: white !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
