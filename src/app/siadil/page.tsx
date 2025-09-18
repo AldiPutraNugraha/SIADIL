@@ -39,7 +39,7 @@ export default function SiadilPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search Document"
+                  placeholder="Search Archive"
                   className="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent custom-focus-ring"
                 />
               </div>
@@ -52,7 +52,7 @@ export default function SiadilPage() {
                 <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Add New Document
+                Create New Archive
               </button>
             </div>
           </div>
@@ -69,10 +69,10 @@ export default function SiadilPage() {
           </h2>
           
           {/* Archives Grid - Card layout */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
             
             {/* Personal Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1">
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
@@ -96,7 +96,7 @@ export default function SiadilPage() {
             </div>
 
             {/* TIK Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1">
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
@@ -115,30 +115,6 @@ export default function SiadilPage() {
                 </div>
               </div>
             </div>
-
-            {/* Create New Archive Card */}
-            <div 
-              className="rounded-lg p-6 cursor-pointer hover:shadow-xl transition-all duration-200 shadow-sm hover:opacity-90"
-              style={{ backgroundColor: '#01793b' }}
-            >
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 border-2 border-white rounded-lg flex items-center justify-center">
-                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0" style={{ background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                  <h3 className="text-base font-medium text-white mb-1" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                    Create new archive
-                  </h3>
-                  <p className="text-sm text-white" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                    Folder baru
-                  </p>
-                </div>
-              </div>
-            </div>
             
           </div>
         </div>
@@ -149,10 +125,10 @@ export default function SiadilPage() {
             Reminders
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             
             {/* SSL Reminder */}
-            <div className="bg-red-500 rounded-lg shadow-sm border border-red-600 p-4">
+            <div className="bg-red-500 rounded-lg shadow-sm border border-red-600 p-4 md:col-span-1">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
                   <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
@@ -165,7 +141,7 @@ export default function SiadilPage() {
                   <h3 className="text-sm font-medium text-white" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
                     SSL01
                   </h3>
-                  <p className="text-sm text-white mt-1" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
+                  <p className="text-xs text-white mt-1" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
                     SSL pupuk-kujang.co.id (Non GCP)
                   </p>
                   <p className="text-xs text-red-100 mt-2" style={{ color: '#fecaca !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
@@ -176,7 +152,7 @@ export default function SiadilPage() {
             </div>
 
             {/* No other reminders */}
-            <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+            <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg text-center md:col-span-1">
               <div className="text-gray-500 text-sm">
                 No other reminders
               </div>
