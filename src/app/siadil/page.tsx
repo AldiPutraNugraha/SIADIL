@@ -10,7 +10,7 @@ export default function SiadilPage() {
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header Section */}
       <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Left side - Title and Breadcrumb */}
             <div className="flex-1">
@@ -67,39 +67,91 @@ export default function SiadilPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Archives Section */}
+        {/* Personal Archive Section */}
         <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-8">
-            Archives
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+            My Archive
           </h2>
-          {/* Archives Grid - Card layout */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-            
             {/* Personal Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1">
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+            <div 
+              className="cursor-pointer transition-shadow duration-200 min-h-[120px] flex items-center hover:shadow-2xl rounded-lg border"
+              style={{ 
+                background: '#01793b',
+                boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+                borderColor: '#16a34a',
+                padding: '1.5rem'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', width: '100%' }}>
+                <div style={{ flexShrink: 0 }}>
+                  <div style={{
+                    width: '3rem',
+                    height: '3rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '0.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '1rem',
+                    fontWeight: 'bold'
+                  }}>
                     AP
                   </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2">
-                    <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" clipRule="evenodd" />
-                    </svg>
-                    <h3 className="text-base font-medium text-gray-900 truncate">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Image 
+                      src="/lock.png" 
+                      alt="Lock Icon" 
+                      width={16}
+                      height={16}
+                      className="object-contain brightness-0 invert"
+                    />
+                    <h3 style={{
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      color: 'white',
+                      margin: 0,
+                      padding: 0,
+                      background: 'none',
+                      lineHeight: '1.5'
+                    }}>
                       Personal
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    12231149
+                  <p style={{
+                    marginTop: '0.25rem',
+                    fontSize: '0.875rem',
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    margin: '0.25rem 0 0 0',
+                    padding: 0,
+                    background: 'none'
+                  }}>
+                    ID: 10122076
                   </p>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Corporate Archives Section */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+            Company Archive
+          </h2>
+          {/* Archives Grid - Card layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
 
             {/* TIK Archive Card */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
@@ -271,6 +323,31 @@ export default function SiadilPage() {
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
                     22 items
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Marketing & Communication Archive Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
+                    <Image 
+                      src="/icon_folder.png" 
+                      alt="Folder Icon" 
+                      width={24}
+                      height={24}
+                      className="object-contain brightness-0 invert"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900">
+                    Marketing & Communication
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    35 items
                   </p>
                 </div>
               </div>
