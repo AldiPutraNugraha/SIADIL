@@ -69,80 +69,119 @@ export default function SiadilPage() {
       {/* Main Content */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Personal Archive Section */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-            My Archive
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-            {/* Personal Archive Card */}
-            <div 
-              className="cursor-pointer transition-shadow duration-200 min-h-[120px] flex items-center hover:shadow-2xl rounded-lg border"
-              style={{ 
-                background: '#01793b',
-                boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-                borderColor: '#16a34a',
-                padding: '1.5rem'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)';
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', width: '100%' }}>
-                <div style={{ flexShrink: 0 }}>
-                  <div style={{
-                    width: '3rem',
-                    height: '3rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    borderRadius: '0.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '1rem',
-                    fontWeight: 'bold'
-                  }}>
-                    AP
-                  </div>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Image 
-                      src="/lock.png" 
-                      alt="Lock Icon" 
-                      width={16}
-                      height={16}
-                      className="object-contain brightness-0 invert"
-                    />
-                    <h3 style={{
-                      fontSize: '1rem',
-                      fontWeight: '500',
+        {/* My Archive and Reminders Section - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          
+          {/* My Archive Column */}
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+              My Archive
+            </h2>
+            
+            <div className="grid grid-cols-1 gap-6">
+              {/* Personal Archive Card */}
+              <div 
+                className="cursor-pointer transition-shadow duration-200 min-h-[140px] flex items-center hover:shadow-2xl rounded-lg border w-full max-w-sm p-6"
+                style={{ 
+                  background: '#01793b',
+                  boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+                  borderColor: '#16a34a',
+                  padding: '1.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', width: '100%' }}>
+                  <div style={{ flexShrink: 0 }}>
+                    <div style={{
+                      width: '3rem',
+                      height: '3rem',
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      borderRadius: '0.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       color: 'white',
-                      margin: 0,
-                      padding: 0,
-                      background: 'none',
-                      lineHeight: '1.5'
+                      fontSize: '1rem',
+                      fontWeight: 'bold'
                     }}>
-                      Personal
-                    </h3>
+                      AP
+                    </div>
                   </div>
-                  <p style={{
-                    marginTop: '0.25rem',
-                    fontSize: '0.875rem',
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    margin: '0.25rem 0 0 0',
-                    padding: 0,
-                    background: 'none'
-                  }}>
-                    ID: 10122076
-                  </p>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Image 
+                        src="/lock.png" 
+                        alt="Lock Icon" 
+                        width={16}
+                        height={16}
+                        className="object-contain brightness-0 invert"
+                      />
+                      <h3 style={{
+                        fontSize: '1rem',
+                        fontWeight: '500',
+                        color: 'white',
+                        margin: 0,
+                        padding: 0,
+                        background: 'none',
+                        lineHeight: '1.5'
+                      }}>
+                        Personal
+                      </h3>
+                    </div>
+                    <p style={{
+                      marginTop: '0.25rem',
+                      fontSize: '0.875rem',
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      margin: '0.25rem 0 0 0',
+                      padding: 0,
+                      background: 'none'
+                    }}>
+                      ID: 10122076
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Reminders Column */}
+          <div className="flex flex-col items-start lg:pl-25 xl:pl-32">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+              Reminders
+            </h2>
+            
+            <div className="grid grid-cols-1 gap-6 w-full">
+              {/* SSL Reminder */}
+              <div className="bg-red-500 rounded-lg shadow-sm border border-red-600 p-6 min-h-[140px] flex items-start w-full max-w-sm">
+                <div className="flex items-start w-full">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
+                      <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="ml-3 flex-1" style={{ background: 'transparent !important', backgroundColor: 'transparent !important' }}>
+                    <h3 className="text-sm font-medium text-white" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
+                      SSL01
+                    </h3>
+                    <p className="text-xs text-white mt-1" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
+                      SSL pupuk-kujang.co.id (Non GCP)
+                    </p>
+                    <p className="text-xs text-red-100 mt-2" style={{ color: '#fecaca !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
+                      This document is expired 3 months ago
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
         </div>
 
         {/* Corporate Archives Section */}
@@ -350,48 +389,6 @@ export default function SiadilPage() {
                     35 items
                   </p>
                 </div>
-              </div>
-            </div>
-            
-          </div>
-        </div>
-
-        {/* Reminders Section */}
-        <div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-8">
-            Reminders
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            
-            {/* SSL Reminder */}
-            <div className="bg-red-500 rounded-lg shadow-sm border border-red-600 p-4 md:col-span-1">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
-                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="ml-3 flex-1" style={{ background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                  <h3 className="text-sm font-medium text-white" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                    SSL01
-                  </h3>
-                  <p className="text-xs text-white mt-1" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                    SSL pupuk-kujang.co.id (Non GCP)
-                  </p>
-                  <p className="text-xs text-red-100 mt-2" style={{ color: '#fecaca !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                    This document is expired 3 months ago
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* No other reminders */}
-            <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg text-center md:col-span-1">
-              <div className="text-gray-500 text-sm">
-                No other reminders
               </div>
             </div>
             
