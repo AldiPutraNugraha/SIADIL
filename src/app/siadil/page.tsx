@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 export default function SiadilPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,7 +22,13 @@ export default function SiadilPage() {
               </p>
               {/* Breadcrumb */}
               <nav className="flex items-center space-x-2 text-sm">
-                <span className="text-gray-500">📁</span>
+                <Image 
+                  src="/icon_folder.png" 
+                  alt="Folder Icon" 
+                  width={16}
+                  height={16}
+                  className="text-gray-500"
+                />
                 <span className="text-gray-700">Root</span>
               </nav>
             </div>
@@ -42,9 +49,9 @@ export default function SiadilPage() {
                   placeholder="Search Archive"
                   className="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent custom-focus-ring"
                 />
-              </div>
+              </div>  
 
-              {/* Add New Document Button */}
+              {/* Create new archives Button */}
               <button 
                 className="inline-flex items-center px-4 py-2 text-white font-medium rounded-lg transition-colors duration-200 hover:opacity-90"
                 style={{ backgroundColor: '#01793b' }}
@@ -67,7 +74,6 @@ export default function SiadilPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mb-8">
             Archives
           </h2>
-          
           {/* Archives Grid - Card layout */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
             
@@ -96,13 +102,17 @@ export default function SiadilPage() {
             </div>
 
             {/* TIK Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1">
-              <div className="flex items-center space-x-4">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+              <div className="flex items-start space-x-4 w-full">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
-                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                    </svg>
+                    <Image 
+                      src="/icon_folder.png" 
+                      alt="Folder Icon" 
+                      width={24}
+                      height={24}
+                      className="object-contain brightness-0 invert"
+                    />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -110,7 +120,157 @@ export default function SiadilPage() {
                     Teknologi, Informasi & Komunikasi
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    TIK
+                    32 items
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Licenses Archive Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
+                    <Image 
+                      src="/icon_folder.png" 
+                      alt="Folder Icon" 
+                      width={24}
+                      height={24}
+                      className="object-contain brightness-0 invert"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900">
+                    Licenses
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    18 items
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Finance Archive Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
+                    <Image 
+                      src="/icon_folder.png" 
+                      alt="Folder Icon" 
+                      width={24}
+                      height={24}
+                      className="object-contain brightness-0 invert"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900">
+                    Finance
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    45 items
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Human Resources Archive Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
+                    <Image 
+                      src="/icon_folder.png" 
+                      alt="Folder Icon" 
+                      width={24}
+                      height={24}
+                      className="object-contain brightness-0 invert"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900">
+                    Human Resources
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    27 items
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Operations Archive Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
+                    <Image 
+                      src="/icon_folder.png" 
+                      alt="Folder Icon" 
+                      width={24}
+                      height={24}
+                      className="object-contain brightness-0 invert"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900">
+                    Operations
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    63 items
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Legal Archive Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
+                    <Image 
+                      src="/icon_folder.png" 
+                      alt="Folder Icon" 
+                      width={24}
+                      height={24}
+                      className="object-contain brightness-0 invert"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900">
+                    Legal
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    39 items
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quality Assurance Archive Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
+                    <Image 
+                      src="/icon_folder.png" 
+                      alt="Folder Icon" 
+                      width={24}
+                      height={24}
+                      className="object-contain brightness-0 invert"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900">
+                    Quality Assurance
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    22 items
                   </p>
                 </div>
               </div>
