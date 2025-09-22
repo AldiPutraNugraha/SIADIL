@@ -2,25 +2,28 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function SiadilPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
 
+  type ArchiveItem = { title: string; count: number; href?: string };
+
   // Central archive data (16 total). First 8 are page 1, next 8 are page 2.
-  const allArchives = [
-    { title: 'Teknologi, Informasi & Komunikasi', count: 32 },
+  const allArchives: ArchiveItem[] = [
+    { title: 'Teknologi, Informasi & Komunikasi', count: 25, href: '/siadil/tik' },
     { title: 'Licenses', count: 18 },
-    { title: 'Finance', count: 45 },
-    { title: 'Human Resources', count: 27 },
-    { title: 'Operations', count: 63 },
-    { title: 'Legal', count: 39 },
+    { title: 'Finance', count: 28 },
+    { title: 'Human Resources', count: 15 },
+    { title: 'Operations', count: 40 },
+    { title: 'Legal', count: 13 },
     { title: 'Quality Assurance', count: 22 },
-    { title: 'Marketing & Communication', count: 35 },
+    { title: 'Marketing & Communication', count: 25 },
     // Page 2 (new archives)
-    { title: 'Procurement', count: 28 },
+    { title: 'Procurement', count: 20 },
     { title: 'Research & Development', count: 16 },
-    { title: 'IT Security', count: 24 },
+    { title: 'IT Security', count: 35 },
     { title: 'Facilities & Maintenance', count: 31 },
     { title: 'Supply Chain', count: 29 },
     { title: 'Customer Service', count: 21 },
@@ -44,8 +47,8 @@ export default function SiadilPage() {
     setPage(1);
   }, [searchQuery]);
 
-  const ArchiveCard = ({ title, count }: { title: string; count: number }) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+  const ArchiveCard = ({ title, count, href }: { title: string; count: number; href?: string }) => {
+    const content = (
       <div className="flex items-center space-x-4 w-full">
         <div className="flex-shrink-0">
           <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
@@ -63,8 +66,19 @@ export default function SiadilPage() {
           <p className="text-sm text-gray-500 mt-1 leading-5">{count} items</p>
         </div>
       </div>
-    </div>
-  );
+    );
+
+    const cls = 'bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center';
+    return href ? (
+      <Link href={href} className={cls}>
+        {content}
+      </Link>
+    ) : (
+      <div className={cls}>
+        {content}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -247,12 +261,12 @@ export default function SiadilPage() {
         {/* Corporate Archives Section */}
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-            Company Archive
+            Archive
           </h2>
           {/* Archives Grid - Card layout (paginated) */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
             {pageItems.map((a) => (
-              <ArchiveCard key={a.title} title={a.title} count={a.count} />
+              <ArchiveCard key={a.title} title={a.title} count={a.count} href={a.href} />
             ))}
           </div>
 
