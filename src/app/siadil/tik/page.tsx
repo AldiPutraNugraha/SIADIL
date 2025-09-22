@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import DocumentTable, { DocumentRow } from '@/components/DocumentTable';
+import { useRouter } from 'next/navigation';
 
 export default function TikArchivePage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
 
   const subFolders = [
@@ -15,6 +18,39 @@ export default function TikArchivePage() {
   const filtered = subFolders.filter((s) =>
     s.title.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
     s.slug.toLowerCase().includes(searchQuery.trim().toLowerCase())
+  );
+
+  // Sample data untuk TIK (bisa diganti API)
+  const allRows: DocumentRow[] = useMemo(() => ([
+    {
+      id: 1,
+      numberTitle: 'IT-001 • SSL Certificate - pupuk-kujang.co.id',
+      description: 'Wildcard cert for primary domain (non GCP).',
+      documentDate: '2025-01-15',
+      contributors: ['Aldi P.', 'Nia K.'],
+      archive: 'Licenses & Renewals',
+      updatedCreatedBy: 'Aldi P. / Nia K.',
+    },
+    {
+      id: 2,
+      numberTitle: 'IT-002 • App Documentation - KUJANG AI',
+      description: 'Onboarding + architecture overview.',
+      documentDate: '2025-03-02',
+      contributors: ['Ahmad R.'],
+      archive: 'Dokumentasi Aplikasi',
+      updatedCreatedBy: 'Ahmad R.',
+    },
+  ]), []);
+
+  const [selectedArchive, setSelectedArchive] = useState<string | null>(null);
+  const docRef = useRef<HTMLDivElement | null>(null);
+  const displayRows = useMemo(
+    () => (selectedArchive ? allRows.filter((r) => r.archive === selectedArchive) : allRows),
+    [allRows, selectedArchive]
+  );
+  const visibleSubFolders = useMemo(
+    () => (selectedArchive ? filtered.filter((s) => s.title === selectedArchive) : filtered),
+    [filtered, selectedArchive]
   );
 
   return (
@@ -32,7 +68,20 @@ export default function TikArchivePage() {
                 <Image src="/icon_folder.png" alt="Folder Icon" width={16} height={16} className="text-gray-500" />
                 <Link href="/siadil" className="text-gray-700 hover:underline">Root</Link>
                 <span className="text-gray-400">/</span>
-                <span className="text-gray-900">Teknologi, Informasi & Komunikasi</span>
+                {/* TIK breadcrumb; klik untuk reset filter */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedArchive(null)}
+                  className={`hover:underline text-left ${selectedArchive ? 'text-gray-700' : 'text-gray-900'}`}
+                >
+                  Teknologi, Informasi & Komunikasi
+                </button>
+                {selectedArchive && (
+                  <>
+                    <span className="text-gray-400">/</span>
+                    <span className="text-gray-900">{selectedArchive}</span>
+                  </>
+                )}
               </nav>
             </div>
 
@@ -71,6 +120,25 @@ export default function TikArchivePage() {
 
       {/* Main Content - sama seperti halaman utama */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back icon (posisi konsisten di area konten bagian atas kiri) */}
+        <div className="mb-4">
+          <button
+            aria-label="Back"
+            title="Back"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50"
+            onClick={() => {
+              if (selectedArchive) {
+                setSelectedArchive(null);
+              } else {
+                router.push('/siadil');
+              }
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        </div>
         {/* My Archive and Reminders Section - Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* My Archive (copy dari halaman utama) */}
@@ -120,8 +188,12 @@ export default function TikArchivePage() {
         <div className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Archives</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((s) => (
-              <Link key={s.slug} href={`/siadil/tik/${s.slug}`} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-200 flex items-center">
+            {visibleSubFolders.map((s) => (
+              <button
+                key={s.slug}
+                onClick={() => { setSelectedArchive(s.title); docRef.current?.scrollIntoView({ behavior: 'smooth' }); }}
+                className="bg-white text-left rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-200 flex items-center"
+              >
                 <div className="flex items-center space-x-4 w-full">
                   <div className="flex-shrink-0">
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
@@ -133,9 +205,14 @@ export default function TikArchivePage() {
                     <p className="text-sm text-gray-500 mt-1 leading-5">{s.slug}</p>
                   </div>
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
+        </div>
+
+        {/* Document table langsung tampil di halaman TIK */}
+        <div ref={docRef}>
+          <DocumentTable title={selectedArchive ?? 'Document'} rows={displayRows} />
         </div>
       </div>
     </div>
