@@ -1,10 +1,70 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 export default function SiadilPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+
+  // Central archive data (16 total). First 8 are page 1, next 8 are page 2.
+  const allArchives = [
+    { title: 'Teknologi, Informasi & Komunikasi', count: 32 },
+    { title: 'Licenses', count: 18 },
+    { title: 'Finance', count: 45 },
+    { title: 'Human Resources', count: 27 },
+    { title: 'Operations', count: 63 },
+    { title: 'Legal', count: 39 },
+    { title: 'Quality Assurance', count: 22 },
+    { title: 'Marketing & Communication', count: 35 },
+    // Page 2 (new archives)
+    { title: 'Procurement', count: 28 },
+    { title: 'Research & Development', count: 16 },
+    { title: 'IT Security', count: 24 },
+    { title: 'Facilities & Maintenance', count: 31 },
+    { title: 'Supply Chain', count: 29 },
+    { title: 'Customer Service', count: 21 },
+    { title: 'Strategy & Planning', count: 14 },
+    { title: 'Health, Safety & Environment', count: 26 },
+  ];
+
+  const ITEMS_PER_PAGE = 8;
+
+  // Filter by search (case-insensitive), then paginate
+  const filtered = allArchives.filter(a =>
+    a.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
+  );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageItems = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
+  const ArchiveCard = ({ title, count }: { title: string; count: number }) => (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
+      <div className="flex items-center space-x-4 w-full">
+        <div className="flex-shrink-0">
+          <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
+            <Image
+              src="/icon_folder.png"
+              alt="Folder Icon"
+              width={24}
+              height={24}
+              className="object-contain brightness-0 invert"
+            />
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-medium text-gray-900 leading-6">{title}</h3>
+          <p className="text-sm text-gray-500 mt-1 leading-5">{count} items</p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -81,12 +141,12 @@ export default function SiadilPage() {
             <div className="grid grid-cols-1 gap-6">
               {/* Personal Archive Card */}
               <div 
-                className="cursor-pointer transition-shadow duration-200 min-h-[140px] flex items-center hover:shadow-2xl rounded-lg border w-full max-w-sm p-6"
+                className="cursor-pointer transition-shadow duration-200 min-h-[120px] flex items-center hover:shadow-2xl rounded-lg border w-full max-w-xs p-4"
                 style={{ 
                   background: '#01793b',
                   boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
                   borderColor: '#16a34a',
-                  padding: '1.5rem'
+                  padding: '1rem'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.boxShadow = '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)';
@@ -150,14 +210,14 @@ export default function SiadilPage() {
           </div>
 
           {/* Reminders Column */}
-          <div className="flex flex-col items-start lg:pl-25 xl:pl-32">
+          <div className="flex flex-col items-start lg:pl-32 xl:pl-48">
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">
               Reminders
             </h2>
             
             <div className="grid grid-cols-1 gap-6 w-full">
               {/* SSL Reminder */}
-              <div className="bg-red-500 rounded-lg shadow-sm border border-red-600 p-6 min-h-[140px] flex items-start w-full max-w-sm">
+              <div className="bg-red-500 rounded-lg shadow-sm border border-red-600 p-4 min-h-[120px] flex items-start w-full max-w-xs">
                 <div className="flex items-start w-full">
                   <div className="flex-shrink-0">
                     <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
@@ -189,209 +249,46 @@ export default function SiadilPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">
             Company Archive
           </h2>
-          {/* Archives Grid - Card layout */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+          {/* Archives Grid - Card layout (paginated) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
+            {pageItems.map((a) => (
+              <ArchiveCard key={a.title} title={a.title} count={a.count} />
+            ))}
+          </div>
 
-            {/* TIK Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
-              <div className="flex items-start space-x-4 w-full">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
-                    <Image 
-                      src="/icon_folder.png" 
-                      alt="Folder Icon" 
-                      width={24}
-                      height={24}
-                      className="object-contain brightness-0 invert"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900">
-                    Teknologi, Informasi & Komunikasi
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    32 items
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* Pagination Controls */}
+          <div className="flex items-center justify-between sm:justify-start gap-4">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-lg border text-sm font-medium ${
+                currentPage === 1
+                  ? 'text-gray-400 border-gray-200 bg-white cursor-not-allowed'
+                  : 'text-gray-700 border-gray-300 bg-white hover:bg-gray-50'
+              }`}
+              aria-label="Previous page"
+            >
+              Previous
+            </button>
 
-            {/* Licenses Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
-              <div className="flex items-start space-x-4 w-full">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
-                    <Image 
-                      src="/icon_folder.png" 
-                      alt="Folder Icon" 
-                      width={24}
-                      height={24}
-                      className="object-contain brightness-0 invert"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900">
-                    Licenses
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    18 items
-                  </p>
-                </div>
-              </div>
-            </div>
+            <span className="text-sm text-gray-600">
+              Page <span className="font-semibold">{currentPage}</span> of{' '}
+              <span className="font-semibold">{totalPages}</span>
+            </span>
 
-            {/* Finance Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
-              <div className="flex items-start space-x-4 w-full">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
-                    <Image 
-                      src="/icon_folder.png" 
-                      alt="Folder Icon" 
-                      width={24}
-                      height={24}
-                      className="object-contain brightness-0 invert"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900">
-                    Finance
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    45 items
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Human Resources Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
-              <div className="flex items-start space-x-4 w-full">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
-                    <Image 
-                      src="/icon_folder.png" 
-                      alt="Folder Icon" 
-                      width={24}
-                      height={24}
-                      className="object-contain brightness-0 invert"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900">
-                    Human Resources
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    27 items
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Operations Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
-              <div className="flex items-start space-x-4 w-full">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
-                    <Image 
-                      src="/icon_folder.png" 
-                      alt="Folder Icon" 
-                      width={24}
-                      height={24}
-                      className="object-contain brightness-0 invert"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900">
-                    Operations
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    63 items
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Legal Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
-              <div className="flex items-start space-x-4 w-full">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
-                    <Image 
-                      src="/icon_folder.png" 
-                      alt="Folder Icon" 
-                      width={24}
-                      height={24}
-                      className="object-contain brightness-0 invert"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900">
-                    Legal
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    39 items
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Quality Assurance Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
-              <div className="flex items-start space-x-4 w-full">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
-                    <Image 
-                      src="/icon_folder.png" 
-                      alt="Folder Icon" 
-                      width={24}
-                      height={24}
-                      className="object-contain brightness-0 invert"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900">
-                    Quality Assurance
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    22 items
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Marketing & Communication Archive Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200 md:col-span-1 min-h-[120px] flex items-center">
-              <div className="flex items-start space-x-4 w-full">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#01793b' }}>
-                    <Image 
-                      src="/icon_folder.png" 
-                      alt="Folder Icon" 
-                      width={24}
-                      height={24}
-                      className="object-contain brightness-0 invert"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900">
-                    Marketing & Communication
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    35 items
-                  </p>
-                </div>
-              </div>
-            </div>
-            
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 rounded-lg border text-sm font-medium ${
+                currentPage === totalPages
+                  ? 'text-gray-400 border-gray-200 bg-white cursor-not-allowed'
+                  : 'text-white' 
+              }`}
+              style={currentPage === totalPages ? undefined : { backgroundColor: '#01793b' }}
+              aria-label="Next page"
+            >
+              Next
+            </button>
           </div>
         </div>
 
