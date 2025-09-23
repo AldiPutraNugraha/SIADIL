@@ -34,6 +34,7 @@ export default function DocumentTable({
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [sortKey, setSortKey] = useState<SortKey>('id');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -147,6 +148,34 @@ export default function DocumentTable({
             </svg>
             Add New Document
           </button>
+          {/* View mode toggle */}
+          <div className="inline-flex rounded-full border border-gray-300 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-2 flex items-center gap-1 text-sm ${viewMode === 'list' ? 'bg-blue-100 text-blue-700' : 'bg-white text-gray-700'}`}
+              aria-pressed={viewMode === 'list'}
+              title="List view"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block">
+                <path d="M4 6h16M4 12h16M4 18h10" strokeLinecap="round" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('card')}
+              className={`px-3 py-2 flex items-center gap-1 text-sm border-l ${viewMode === 'card' ? 'bg-blue-100 text-blue-700' : 'bg-white text-gray-700'}`}
+              aria-pressed={viewMode === 'card'}
+              title="Card view"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block">
+                <rect x="4" y="4" width="7" height="7" rx="1"/>
+                <rect x="13" y="4" width="7" height="7" rx="1"/>
+                <rect x="4" y="13" width="7" height="7" rx="1"/>
+                <rect x="13" y="13" width="7" height="7" rx="1"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -161,53 +190,107 @@ export default function DocumentTable({
         <button className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white">☰ View</button>
       </div>
 
-      {/* table */}
-      <div className="overflow-auto border rounded-lg">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-50 text-gray-700">
-            <tr>
-              <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('id')}>ID <SortIcon col="id" /></th>
-              <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('numberTitle')}>Number & Title <SortIcon col="numberTitle" /></th>
-              <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('description')}>Description <SortIcon col="description" /></th>
-              <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('documentDate')}>Document Date <SortIcon col="documentDate" /></th>
-              <th className="px-4 py-2 text-left">Contributors</th>
-              <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('archive')}>Archive <SortIcon col="archive" /></th>
-              <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('updatedCreatedBy')}>Update & Create by <SortIcon col="updatedCreatedBy" /></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {viewRows.length === 0 ? (
+      {/* content area: table (list) or grid (card) */}
+      {viewMode === 'list' ? (
+        <div className="overflow-auto border rounded-lg">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-50 text-gray-700">
               <tr>
-                <td className="px-4 py-6 text-center text-gray-500" colSpan={7}>No documents found.</td>
+                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('id')}>ID <SortIcon col="id" /></th>
+                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('numberTitle')}>Number & Title <SortIcon col="numberTitle" /></th>
+                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('description')}>Description <SortIcon col="description" /></th>
+                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('documentDate')}>Document Date <SortIcon col="documentDate" /></th>
+                <th className="px-4 py-2 text-left">Contributors</th>
+                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('archive')}>Archive <SortIcon col="archive" /></th>
+                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('updatedCreatedBy')}>Update & Create by <SortIcon col="updatedCreatedBy" /></th>
               </tr>
-            ) : (
-              viewRows.map((r) => (
-                <tr key={String(r.id)} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 align-top text-gray-700">{r.id}</td>
-                  <td className="px-4 py-2 align-top text-gray-900">
-                    {(() => {
-                      const parts = (r.numberTitle ?? '').split('•');
-                      const code = (parts[0] ?? '').trim();
-                      const label = (parts[1] ?? '').trim();
-                      return (
-                        <div className="leading-tight">
-                          <div className="font-semibold text-gray-900 uppercase">{code}</div>
-                          {label && <div className="mt-0.5 text-gray-900 uppercase">{label}</div>}
-                        </div>
-                      );
-                    })()}
-                  </td>
-                  <td className="px-4 py-2 align-top text-gray-700 max-w-xl">{r.description}</td>
-                  <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">{r.documentDate}</td>
-                  <td className="px-4 py-2 align-top text-gray-700">{(r.contributors ?? []).join(', ')}</td>
-                  <td className="px-4 py-2 align-top text-gray-700">{r.archive}</td>
-                  <td className="px-4 py-2 align-top text-gray-700">{r.updatedCreatedBy}</td>
+            </thead>
+            <tbody className="divide-y">
+              {viewRows.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-6 text-center text-gray-500" colSpan={7}>No documents found.</td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                viewRows.map((r) => (
+                  <tr key={String(r.id)} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 align-top text-gray-700">{r.id}</td>
+                    <td className="px-4 py-2 align-top text-gray-900">
+                      {(() => {
+                        const parts = (r.numberTitle ?? '').split('•');
+                        const code = (parts[0] ?? '').trim();
+                        const label = (parts[1] ?? '').trim();
+                        return (
+                          <div className="leading-tight">
+                            <div className="font-semibold text-gray-900 uppercase">{code}</div>
+                            {label && <div className="mt-0.5 text-gray-900 uppercase">{label}</div>}
+                          </div>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-4 py-2 align-top text-gray-700 max-w-xl">{r.description}</td>
+                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">{r.documentDate}</td>
+                    <td className="px-4 py-2 align-top text-gray-700">{(r.contributors ?? []).join(', ')}</td>
+                    <td className="px-4 py-2 align-top text-gray-700">{r.archive}</td>
+                    <td className="px-4 py-2 align-top text-gray-700">{r.updatedCreatedBy}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="border rounded-lg p-4">
+          {viewRows.length === 0 ? (
+            <div className="px-4 py-6 text-center text-gray-500">No documents found.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {viewRows.map((r) => {
+                const parts = (r.numberTitle ?? '').split('•');
+                const code = (parts[0] ?? '').trim();
+                const label = (parts[1] ?? '').trim();
+                return (
+                  <div key={String(r.id)} className="bg-white border rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs px-2 py-0.5 rounded-full border text-gray-700">ID {r.id}</span>
+                      {r.archive && <span className="text-xs text-gray-600">{r.archive}</span>}
+                    </div>
+                    <div className="leading-tight mb-2">
+                      <div className="font-semibold text-gray-900 uppercase">{code}</div>
+                      {label && <div className="mt-0.5 text-gray-900 uppercase">{label}</div>}
+                    </div>
+                    {r.description && (
+                      <p className="text-sm text-gray-700 mb-3 line-clamp-3">{r.description}</p>
+                    )}
+                    <div className="mt-3 space-y-1 text-sm text-gray-700">
+                      {r.documentDate && (
+                        <div className="flex items-center gap-2" title="Document Date">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                          <span className="text-gray-600 font-medium">Document Date:</span>
+                          <span className="text-gray-800">{r.documentDate}</span>
+                        </div>
+                      )}
+                      {(r.contributors && r.contributors.length > 0) && (
+                        <div className="flex items-center gap-2" title="Contributors">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                          <span className="text-gray-600 font-medium">Contributors:</span>
+                          <span className="text-gray-800">{(r.contributors ?? []).join(', ')}</span>
+                        </div>
+                      )}
+                      {r.updatedCreatedBy && (
+                        <div className="flex items-center gap-2" title="Updated & Created by">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                          <span className="text-gray-600 font-medium">Updated / Created by:</span>
+                          <span className="text-gray-800">{r.updatedCreatedBy}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* footer */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-3 text-sm text-gray-600">

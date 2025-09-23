@@ -198,6 +198,37 @@ function folderSpecificContent(archiveTitle: string, i: number): { codeLabel: st
     return { codeLabel: pick(labels), description: pick(desc) };
   }
 
+  // Teknologi, Informasi & Komunikasi (TIK)
+  if (
+    title.toLowerCase().includes('teknologi') ||
+    title.toLowerCase().includes('informasi') ||
+    title.toLowerCase().includes('komunikasi') ||
+    title.toLowerCase().includes('tik') ||
+    title.toLowerCase().includes('technology')
+  ) {
+    const labels = [
+      'IT POLICY',
+      'SYSTEM ARCHITECTURE',
+      'NETWORK DIAGRAM',
+      'SERVER INVENTORY',
+      'CHANGE REQUEST',
+      'INCIDENT SUMMARY',
+      'BACKUP REPORT',
+      'ACCESS REQUEST',
+      'ASSET INVENTORY',
+      'SERVICE CATALOG',
+      'CAPACITY PLAN',
+      'RELEASE NOTES',
+    ];
+    const desc = [
+      'Dokumen kebijakan dan standar operasional TI tingkat perusahaan.',
+      'Arsitektur sistem, integrasi, dan peta layanan TI.',
+      'Inventarisasi aset, akses, dan laporan operasional infrastruktur.',
+      'Ringkasan insiden, perubahan, dan rilis untuk layanan TI.',
+    ];
+    return { codeLabel: pick(labels), description: pick(desc) };
+  }
+
   // Personal archive (private documents)
   if (title.includes('personal')) {
     const labels = [
