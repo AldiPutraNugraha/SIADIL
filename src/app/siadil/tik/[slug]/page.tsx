@@ -34,7 +34,7 @@ export default function TikSubFolderPage({ params }: { params: { slug: string } 
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-white dark:bg-white text-gray-900">
       <div className="bg-white">
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">

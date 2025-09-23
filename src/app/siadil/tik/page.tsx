@@ -54,7 +54,7 @@ export default function TikArchivePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-white dark:bg-white text-gray-900">
       {/* Header Section (tetap sama dengan halaman utama) */}
       <div className="bg-white">
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6">

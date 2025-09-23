@@ -12,11 +12,6 @@
   box-sizing: border-box;
 }
 
-/* Ensure consistent background color */
-body {
-  background-color: #f9fafb !important; /* gray-50 */
-}
-
 /* Custom focus ring for search input */
 .custom-focus-ring:focus {
   --tw-ring-color: #01793b !important;

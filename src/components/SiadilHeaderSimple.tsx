@@ -174,7 +174,7 @@ const SiadilHeaderSimple = () => {
         return notificationData.notifications;
     }
   };
-
+  
   useEffect(() => {
     setIsClient(true);
     
@@ -268,7 +268,7 @@ const SiadilHeaderSimple = () => {
 
     const applyInitialTheme = (isDark: boolean) => {
       const html = document.documentElement;
-      
+        
       if (isDark) {
         html.classList.add('dark');
         html.style.backgroundColor = '#0c0a09';

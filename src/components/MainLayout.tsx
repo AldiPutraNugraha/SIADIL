@@ -55,7 +55,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </div>
         
         {/* Scrollable Main Content */}
-        <main className="min-h-screen bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
+        <main className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
           {children}
         </main>
       </div>
