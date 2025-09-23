@@ -60,11 +60,37 @@ export default function DocumentTable({
   const sorted = useMemo(() => {
     const copy = [...filtered];
     copy.sort((a, b) => {
-      const av = (a[sortKey] ?? '').toString().toLowerCase();
-      const bv = (b[sortKey] ?? '').toString().toLowerCase();
-      if (av < bv) return sortDir === 'asc' ? -1 : 1;
-      if (av > bv) return sortDir === 'asc' ? 1 : -1;
-      return 0;
+      let result = 0;
+
+      if (sortKey === 'id') {
+        const toNum = (v: unknown) => {
+          if (typeof v === 'number') return v;
+          const s = String(v);
+          // Prefer pure number if possible; fallback to extracting digits
+          const n = Number(s);
+          if (!Number.isNaN(n)) return n;
+          const digits = s.match(/\d+/);
+          return digits ? Number(digits[0]) : 0;
+        };
+        const an = toNum(a.id);
+        const bn = toNum(b.id);
+        result = an - bn;
+      } else if (sortKey === 'documentDate') {
+        const toTime = (v?: string) => (v ? Date.parse(v) : 0);
+        const at = toTime(a.documentDate);
+        const bt = toTime(b.documentDate);
+        result = at - bt;
+      } else {
+        const av = (a[sortKey] as unknown as string | number | undefined);
+        const bv = (b[sortKey] as unknown as string | number | undefined);
+        const as = (av ?? '').toString().toLowerCase();
+        const bs = (bv ?? '').toString().toLowerCase();
+        if (as < bs) result = -1;
+        else if (as > bs) result = 1;
+        else result = 0;
+      }
+
+      return sortDir === 'asc' ? result : -result;
     });
     return copy;
   }, [filtered, sortKey, sortDir]);
@@ -158,7 +184,19 @@ export default function DocumentTable({
               viewRows.map((r) => (
                 <tr key={String(r.id)} className="hover:bg-gray-50">
                   <td className="px-4 py-2 align-top text-gray-700">{r.id}</td>
-                  <td className="px-4 py-2 align-top text-gray-900 font-medium">{r.numberTitle}</td>
+                  <td className="px-4 py-2 align-top text-gray-900">
+                    {(() => {
+                      const parts = (r.numberTitle ?? '').split('•');
+                      const code = (parts[0] ?? '').trim();
+                      const label = (parts[1] ?? '').trim();
+                      return (
+                        <div className="leading-tight">
+                          <div className="font-semibold text-gray-900 uppercase">{code}</div>
+                          {label && <div className="mt-0.5 text-gray-900 uppercase">{label}</div>}
+                        </div>
+                      );
+                    })()}
+                  </td>
                   <td className="px-4 py-2 align-top text-gray-700 max-w-xl">{r.description}</td>
                   <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">{r.documentDate}</td>
                   <td className="px-4 py-2 align-top text-gray-700">{(r.contributors ?? []).join(', ')}</td>

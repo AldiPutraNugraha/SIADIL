@@ -1,15 +1,14 @@
-"use client";
-
 import Link from 'next/link';
 import DocumentTable, { DocumentRow } from '@/components/DocumentTable';
 
-export default function TikSubFolderPage({ params }: { params: { slug: string } }) {
+export default async function TikSubFolderPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const titleMap: Record<string, string> = {
     'licenses-renewals': 'Licenses & Renewals',
     'DOKUMENTASIAPLIKASI': 'Dokumentasi Aplikasi',
   };
 
-  const title = titleMap[params.slug] || params.slug;
+  const title = titleMap[slug] || slug;
 
   // sample rows; replace with data fetching later
   const sampleRows: DocumentRow[] = [

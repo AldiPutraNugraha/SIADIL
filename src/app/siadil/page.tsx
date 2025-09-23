@@ -154,7 +154,7 @@ export default function SiadilPage() {
             
             <div className="grid grid-cols-1 gap-6">
               {/* Personal Archive Card */}
-              <div 
+              <Link href="/siadil/personal" 
                 className="cursor-pointer transition-shadow duration-200 min-h-[120px] flex items-center hover:shadow-2xl rounded-lg border w-full max-w-xs p-4"
                 style={{ 
                   background: '#01793b',
@@ -219,7 +219,7 @@ export default function SiadilPage() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
 
