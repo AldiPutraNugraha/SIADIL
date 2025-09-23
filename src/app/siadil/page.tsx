@@ -12,23 +12,23 @@ export default function SiadilPage() {
 
   // Central archive data (16 total). First 8 are page 1, next 8 are page 2.
   const allArchives: ArchiveItem[] = [
-    { title: 'Teknologi, Informasi & Komunikasi', count: 25, href: '/siadil/tik' },
-    { title: 'Licenses', count: 18 },
-    { title: 'Finance', count: 28 },
-    { title: 'Human Resources', count: 15 },
-    { title: 'Operations', count: 40 },
-    { title: 'Legal', count: 13 },
-    { title: 'Quality Assurance', count: 22 },
-    { title: 'Marketing & Communication', count: 25 },
+    { title: 'Teknologi, Informasi & Komunikasi', count: 35, href: '/siadil/tik' },
+    { title: 'Licenses', count: 25, href: '/siadil/licenses' },
+    { title: 'Finance', count: 30, href: '/siadil/finance' },
+    { title: 'Human Resources', count: 25, href: '/siadil/human-resources' },
+    { title: 'Operations', count: 40, href: '/siadil/operations' },
+    { title: 'Legal', count: 25, href: '/siadil/legal' },
+    { title: 'Quality Assurance', count: 25, href: '/siadil/quality-assurance' },
+    { title: 'Marketing & Communication', count: 30, href: '/siadil/marketing-communication' },
     // Page 2 (new archives)
-    { title: 'Procurement', count: 20 },
-    { title: 'Research & Development', count: 16 },
-    { title: 'IT Security', count: 35 },
-    { title: 'Facilities & Maintenance', count: 31 },
-    { title: 'Supply Chain', count: 29 },
-    { title: 'Customer Service', count: 21 },
-    { title: 'Strategy & Planning', count: 14 },
-    { title: 'Health, Safety & Environment', count: 26 },
+    { title: 'Procurement', count: 25, href: '/siadil/procurement' },
+    { title: 'Research & Development', count: 30, href: '/siadil/research-development' },
+    { title: 'IT Security', count: 35, href: '/siadil/it-security' },
+    { title: 'Facilities & Maintenance', count: 25, href: '/siadil/facilities-maintenance' },
+    { title: 'Supply Chain', count: 25, href: '/siadil/supply-chain' },
+    { title: 'Customer Service', count: 30, href: '/siadil/customer-service' },
+    { title: 'Strategy & Planning', count: 25, href: '/siadil/strategy-planning' },
+    { title: 'Health, Safety & Environment', count: 35, href: '/siadil/health-safety-environment' },
   ];
 
   const ITEMS_PER_PAGE = 8;
