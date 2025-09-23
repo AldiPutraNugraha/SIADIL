@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export type DocumentRow = {
   id: string | number;
@@ -20,6 +20,8 @@ type Props = {
   pageSizeOptions?: number[];
   defaultPageSize?: number;
   onAddNew?: () => void;
+  onEdit?: (row: DocumentRow) => void;
+  onDelete?: (row: DocumentRow) => void | Promise<void>;
 };
 
 export default function DocumentTable({
@@ -28,35 +30,67 @@ export default function DocumentTable({
   pageSizeOptions = [10, 25, 50],
   defaultPageSize = 10,
   onAddNew,
+  onEdit,
+  onDelete,
 }: Props) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [sortKey, setSortKey] = useState<SortKey>('id');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
+  // internal data for local delete fallback
+  const [data, setData] = useState<DocumentRow[]>(rows);
+  const [openMenuId, setOpenMenuId] = useState<string | number | null>(null);
+
+  // keep internal data in sync when rows prop changes
+  useEffect(() => {
+    setData(rows);
+    // reset pagination to first page on external rows change
+    setPage(1);
+  }, [rows]);
+
+  // close menu on outside click / escape
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      const el = containerRef.current;
+      if (!el) return;
+      const target = e.target as Node | null;
+      // Close only if clicking outside the table/card container
+      if (target && !el.contains(target)) {
+        setOpenMenuId(null);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpenMenuId(null);
+    }
+    document.addEventListener('click', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    let data = rows;
-    if (term) {
-      data = rows.filter((r) =>
-        [
-          String(r.id),
-          r.numberTitle,
-          r.description ?? '',
-          r.documentDate ?? '',
-          (r.contributors ?? []).join(' '),
-          r.archive ?? '',
-          r.updatedCreatedBy ?? '',
-        ]
-          .join(' ')
-          .toLowerCase()
-          .includes(term)
-      );
-    }
-    return data;
-  }, [rows, search]);
+    if (!term) return data;
+    return data.filter((r) =>
+      [
+        String(r.id),
+        r.numberTitle,
+        r.description ?? '',
+        r.documentDate ?? '',
+        (r.contributors ?? []).join(' '),
+        r.archive ?? '',
+        r.updatedCreatedBy ?? '',
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(term)
+    );
+  }, [data, search]);
 
   const sorted = useMemo(() => {
     const copy = [...filtered];
@@ -116,8 +150,26 @@ export default function DocumentTable({
     </span>
   );
 
+  const handleEdit = (row: DocumentRow) => {
+    if (onEdit) return onEdit(row);
+    alert(`Edit Document ID ${row.id}`);
+  };
+
+  const handleDelete = async (row: DocumentRow) => {
+    try {
+      if (onDelete) {
+        await onDelete(row);
+      } else {
+        // local delete fallback
+        setData((prev) => prev.filter((r) => String(r.id) !== String(row.id)));
+      }
+    } finally {
+      setOpenMenuId(null);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
+    <div ref={containerRef} className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
       {/* Top bar: title, search, add */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
@@ -203,12 +255,13 @@ export default function DocumentTable({
                 <th className="px-4 py-2 text-left">Contributors</th>
                 <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('archive')}>Archive <SortIcon col="archive" /></th>
                 <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('updatedCreatedBy')}>Update & Create by <SortIcon col="updatedCreatedBy" /></th>
+                <th className="px-4 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {viewRows.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-6 text-center text-gray-500" colSpan={7}>No documents found.</td>
+                  <td className="px-4 py-6 text-center text-gray-500" colSpan={8}>No documents found.</td>
                 </tr>
               ) : (
                 viewRows.map((r) => (
@@ -232,6 +285,21 @@ export default function DocumentTable({
                     <td className="px-4 py-2 align-top text-gray-700">{(r.contributors ?? []).join(', ')}</td>
                     <td className="px-4 py-2 align-top text-gray-700">{r.archive}</td>
                     <td className="px-4 py-2 align-top text-gray-700">{r.updatedCreatedBy}</td>
+                    <td className="px-4 py-2 align-top text-right relative" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        aria-label="More actions"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100"
+                        onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
+                      >
+                        ⋯
+                      </button>
+                      {openMenuId === r.id && (
+                        <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-20">
+                          <button className="w-full text-left px-3 py-2 hover:bg-gray-50" onClick={() => handleEdit(r)}>Edit</button>
+                          <button className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50" onClick={() => handleDelete(r)}>Delete</button>
+                        </div>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
@@ -249,11 +317,26 @@ export default function DocumentTable({
                 const code = (parts[0] ?? '').trim();
                 const label = (parts[1] ?? '').trim();
                 return (
-                  <div key={String(r.id)} className="bg-white border rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
+                  <div key={String(r.id)} className="bg-white border rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow relative" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs px-2 py-0.5 rounded-full border text-gray-700">ID {r.id}</span>
-                      {r.archive && <span className="text-xs text-gray-600">{r.archive}</span>}
+                      <div className="flex items-center gap-2">
+                        {r.archive && <span className="text-xs text-gray-600 hidden sm:inline">{r.archive}</span>}
+                        <button
+                          aria-label="More actions"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100"
+                          onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
+                        >
+                          ⋯
+                        </button>
+                      </div>
                     </div>
+                    {openMenuId === r.id && (
+                      <div className="absolute right-2 top-10 w-40 bg-white border rounded-md shadow-lg z-20">
+                        <button className="w-full text-left px-3 py-2 hover:bg-gray-50" onClick={() => handleEdit(r)}>Edit</button>
+                        <button className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50" onClick={() => handleDelete(r)}>Delete</button>
+                      </div>
+                    )}
                     <div className="leading-tight mb-2">
                       <div className="font-semibold text-gray-900 uppercase">{code}</div>
                       {label && <div className="mt-0.5 text-gray-900 uppercase">{label}</div>}
