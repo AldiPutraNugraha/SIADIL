@@ -122,23 +122,23 @@ export default function TikArchivePage() {
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Back icon (posisi konsisten di area konten bagian atas kiri) */}
         <div className="mb-4">
-          <button
-            aria-label="Back"
-            title="Back"
-            className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50"
-            onClick={() => {
-              if (selectedArchive) {
-                setSelectedArchive(null);
-              } else {
-                router.push('/siadil');
-              }
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-        </div>
+  <button
+    aria-label="Back"
+    title="Back"
+    className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-600 text-gray-600 hover:bg-gray-300 transition-all active:scale-95 active:bg-gray-100 hover:shadow-lg hover:-translate-y-0.5"
+    onClick={() => {
+      if (selectedArchive) {
+        setSelectedArchive(null);
+      } else {
+        router.push('/siadil');
+      }
+    }}
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+</div>
         {/* My Archive and Reminders Section - Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* My Archive (copy dari halaman utama) */}
