@@ -79,3 +79,46 @@
   background: transparent !important;
   background-color: transparent !important;
 }
+
+/* ===== Animasi klik untuk tombol tiga titik (ellipsis menu) ===== */
+@keyframes clickPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+@keyframes softRipple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* Tambahkan ke tombol: btn-ripple btn-ellipsis-anim */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple dari tengah saat tombol ditekan */
+.btn-ripple:active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200%;
+  aspect-ratio: 1 / 1;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.12);
+  transform: translate(-50%, -50%) scale(0.2);
+  animation: softRipple 0.45s ease-out;
+  pointer-events: none;
+}
+
+.btn-ellipsis-anim:active {
+  animation: clickPulse 0.2s ease-out;
+}

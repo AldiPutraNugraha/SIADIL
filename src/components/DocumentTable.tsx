@@ -255,7 +255,7 @@ export default function DocumentTable({
                 <th className="px-4 py-2 text-left">Contributors</th>
                 <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('archive')}>Archive <SortIcon col="archive" /></th>
                 <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('updatedCreatedBy')}>Update & Create by <SortIcon col="updatedCreatedBy" /></th>
-                <th className="px-4 py-2 text-right">Actions</th>
+                <th className="px-4 py-2 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -288,7 +288,7 @@ export default function DocumentTable({
                     <td className="px-4 py-2 align-top text-right relative" onClick={(e) => e.stopPropagation()}>
                       <button
                         aria-label="More actions"
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim"
                         onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
                       >
                         ⋯
@@ -324,7 +324,7 @@ export default function DocumentTable({
                         {r.archive && <span className="text-xs text-gray-600 hidden sm:inline">{r.archive}</span>}
                         <button
                           aria-label="More actions"
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim"
                           onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
                         >
                           ⋯
