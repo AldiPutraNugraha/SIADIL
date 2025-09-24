@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Tooltip from './Tooltip';
+import ConfirmDialog from './ConfirmDialog';
 
 export type DocumentRow = {
   id: string | number;
@@ -43,6 +45,9 @@ export default function DocumentTable({
   // internal data for local delete fallback
   const [data, setData] = useState<DocumentRow[]>(rows);
   const [openMenuId, setOpenMenuId] = useState<string | number | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const pendingDeleteRef = useRef<DocumentRow | null>(null);
 
   // keep internal data in sync when rows prop changes
   useEffect(() => {
@@ -59,6 +64,14 @@ export default function DocumentTable({
         if (storedView === 'list' || storedView === 'card') setViewMode(storedView);
         const storedPageSize = window.localStorage.getItem('docTable:pageSize');
         if (storedPageSize) setPageSize(Number(storedPageSize));
+        const storedSortKey = window.localStorage.getItem('docTable:sortKey') as SortKey | null;
+        const storedSortDir = window.localStorage.getItem('docTable:sortDir') as ('asc' | 'desc') | null;
+        if (storedSortKey) setSortKey(storedSortKey);
+        if (storedSortDir === 'asc' || storedSortDir === 'desc') setSortDir(storedSortDir);
+        const storedPage = window.localStorage.getItem('docTable:page');
+        const storedSearch = window.localStorage.getItem('docTable:search');
+        if (storedPage) setPage(Math.max(1, Number(storedPage)));
+        if (storedSearch) setSearch(storedSearch);
       }
     } catch {}
   }, []);
@@ -75,6 +88,28 @@ export default function DocumentTable({
       if (typeof window !== 'undefined') window.localStorage.setItem('docTable:pageSize', String(pageSize));
     } catch {}
   }, [pageSize]);
+
+  // Persist sort & page
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') window.localStorage.setItem('docTable:sortKey', sortKey);
+    } catch {}
+  }, [sortKey]);
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') window.localStorage.setItem('docTable:sortDir', sortDir);
+    } catch {}
+  }, [sortDir]);
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') window.localStorage.setItem('docTable:page', String(page));
+    } catch {}
+  }, [page]);
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') window.localStorage.setItem('docTable:search', search);
+    } catch {}
+  }, [search]);
 
   // close menu on outside click / escape
   useEffect(() => {
@@ -96,6 +131,20 @@ export default function DocumentTable({
       document.removeEventListener('click', onDocClick);
       document.removeEventListener('keydown', onKey);
     };
+  }, []);
+
+  // Shortcut '/' untuk fokus ke search (abaikan jika sedang mengetik di field lain)
+  useEffect(() => {
+    function onSlash(e: KeyboardEvent) {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+    document.addEventListener('keydown', onSlash);
+    return () => document.removeEventListener('keydown', onSlash);
   }, []);
 
   const filtered = useMemo(() => {
@@ -184,21 +233,33 @@ export default function DocumentTable({
   };
 
   const handleDelete = async (row: DocumentRow) => {
+    pendingDeleteRef.current = row;
+    setConfirmOpen(true);
+  };
+
+  const doConfirmDelete = async () => {
+    const row = pendingDeleteRef.current;
+    if (!row) return setConfirmOpen(false);
     try {
-      const confirmed = typeof window === 'undefined' ? true : window.confirm(`Hapus dokumen ID ${row.id}?`);
-      if (!confirmed) return;
       if (onDelete) {
         await onDelete(row);
-      } else {
-        // local delete fallback
-        setData((prev) => prev.filter((r) => String(r.id) !== String(row.id)));
       }
+      // local delete fallback or optimistic update
+      setData((prev) => prev.filter((r) => String(r.id) !== String(row.id)));
     } finally {
       setOpenMenuId(null);
+      setConfirmOpen(false);
+      pendingDeleteRef.current = null;
     }
   };
 
+  const cancelConfirmDelete = () => {
+    setConfirmOpen(false);
+    pendingDeleteRef.current = null;
+  };
+
   return (
+    <>
     <div ref={containerRef} className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
       {/* Top bar: title, search, add */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -211,14 +272,25 @@ export default function DocumentTable({
               </svg>
             </div>
             <input
+              ref={searchRef}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
               placeholder="Search Document"
-              className="block w-full sm:w-72 pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent"
+              className="block w-full sm:w-72 pl-10 pr-10 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent"
             />
+            {search && (
+              <button
+                aria-label="Clear search"
+                title="Clear search"
+                className="absolute inset-y-0 right-0 pr-3 text-gray-400 hover:text-gray-600"
+                onClick={() => setSearch('')}
+              >
+                ×
+              </button>
+            )}
           </div>
           <button
             onClick={() => (onAddNew ? onAddNew() : alert('Add New Document pressed'))}
@@ -321,39 +393,78 @@ export default function DocumentTable({
                         );
                       })()}
                     </td>
-                    <td className="px-4 py-2 align-top text-gray-700 max-w-xl">{r.description}</td>
+                    <td className="px-4 py-2 align-top text-gray-700 max-w-xl">
+                      {r.description ? (
+                        <Tooltip content={r.description} placement="top">
+                          <div className="max-w-xl truncate cursor-help">{r.description}</div>
+                        </Tooltip>
+                      ) : null}
+                    </td>
                     <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">{r.documentDate}</td>
-                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap" title={(r.contributors ?? []).join(', ')}>
-                      <div className="flex flex-wrap gap-1">
-                        {(r.contributors ?? []).map((name, idx) => (
-                          <span key={`${r.id}-c-${idx}`} className="inline-flex items-center px-2 py-0.5 text-xs rounded-full border bg-gray-50 text-gray-700">
-                            {name}
-                          </span>
-                        ))}
-                      </div>
+                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">
+                      <Tooltip content={(r.contributors ?? []).join(', ')} placement="top">
+                        <div className="flex flex-wrap gap-1 cursor-help">
+                          {(r.contributors ?? []).map((name, idx) => (
+                            <span key={`${r.id}-c-${idx}`} className="inline-flex items-center px-2 py-0.5 text-xs rounded-full border bg-gray-50 text-gray-700">
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      </Tooltip>
                     </td>
                     <td className="px-4 py-2 align-top text-gray-700">
                       {r.archive ? (
-                        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full border bg-gray-50 text-gray-700" title={r.archive}>
+                        <span className={`inline-flex items-center px-2 py-0.5 text-xs rounded-full border ${getArchiveBadgeClasses(r.archive)}`}>
                           {r.archive}
                         </span>
                       ) : null}
                     </td>
-                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap" title={r.updatedCreatedBy}>{r.updatedCreatedBy}</td>
+                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">
+                      {r.updatedCreatedBy ? (
+                        <Tooltip content={`Update & Create by: ${r.updatedCreatedBy}`} placement="top">
+                          <span className="cursor-help">{r.updatedCreatedBy}</span>
+                        </Tooltip>
+                      ) : null}
+                    </td>
                     <td className="px-4 py-2 align-top text-right relative" onClick={(e) => e.stopPropagation()}>
                       <button
                         aria-label="More actions"
-                        title="More actions"
                         aria-expanded={openMenuId === r.id}
                         className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setOpenMenuId(r.id);
+                            setTimeout(() => {
+                              const first = document.querySelector(`#menu-list-${CSS.escape(String(r.id))} [data-menu-item]`) as HTMLElement | null;
+                              first?.focus();
+                            }, 0);
+                          }
+                        }}
                       >
                         ⋯
                       </button>
                       {openMenuId === r.id && (
-                        <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Row actions menu">
-                          <button className="w-full text-left px-3 py-2 hover:bg-gray-50" onClick={() => handleEdit(r)}>Edit</button>
-                          <button className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50" onClick={() => handleDelete(r)}>Delete</button>
+                        <div id={`menu-list-${String(r.id)}`} className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Row actions menu"
+                          onKeyDown={(e) => {
+                            const items = Array.from((e.currentTarget.querySelectorAll('[data-menu-item]')) as NodeListOf<HTMLElement>);
+                            const idx = items.findIndex((el) => el === document.activeElement);
+                            if (e.key === 'ArrowDown') {
+                              e.preventDefault();
+                              const next = items[(idx + 1) % items.length];
+                              next?.focus();
+                            } else if (e.key === 'ArrowUp') {
+                              e.preventDefault();
+                              const prev = items[(idx - 1 + items.length) % items.length];
+                              prev?.focus();
+                            } else if (e.key === 'Escape') {
+                              setOpenMenuId(null);
+                            }
+                          }}
+                        >
+                          <button data-menu-item className="w-full text-left px-3 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none" onClick={() => handleEdit(r)}>Edit</button>
+                          <button data-menu-item className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none" onClick={() => handleDelete(r)}>Delete</button>
                         </div>
                       )}
                     </td>
@@ -378,22 +489,49 @@ export default function DocumentTable({
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs px-2 py-0.5 rounded-full border text-gray-700">ID {r.id}</span>
                       <div className="flex items-center gap-2">
-                        {r.archive && <span className="text-xs text-gray-600 hidden sm:inline">{r.archive}</span>}
+                        {r.archive && (
+                          <span className={`hidden sm:inline text-xs px-2 py-0.5 rounded-full border ${getArchiveBadgeClasses(r.archive)}`}>{r.archive}</span>
+                        )}
                         <button
                           aria-label="More actions"
-                          title="More actions"
                           aria-expanded={openMenuId === r.id}
                           className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                           onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'ArrowDown') {
+                              e.preventDefault();
+                              setOpenMenuId(r.id);
+                              setTimeout(() => {
+                                const first = document.querySelector(`#menu-card-${CSS.escape(String(r.id))} [data-menu-item]`) as HTMLElement | null;
+                                first?.focus();
+                              }, 0);
+                            }
+                          }}
                         >
                           ⋯
                         </button>
                       </div>
                     </div>
                     {openMenuId === r.id && (
-                      <div className="absolute right-2 top-10 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Card actions menu">
-                        <button className="w-full text-left px-3 py-2 hover:bg-gray-50" onClick={() => handleEdit(r)}>Edit</button>
-                        <button className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50" onClick={() => handleDelete(r)}>Delete</button>
+                      <div id={`menu-card-${String(r.id)}`} className="absolute right-2 top-10 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Card actions menu"
+                        onKeyDown={(e) => {
+                          const items = Array.from((e.currentTarget.querySelectorAll('[data-menu-item]')) as NodeListOf<HTMLElement>);
+                          const idx = items.findIndex((el) => el === document.activeElement);
+                          if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            const next = items[(idx + 1) % items.length];
+                            next?.focus();
+                          } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            const prev = items[(idx - 1 + items.length) % items.length];
+                            prev?.focus();
+                          } else if (e.key === 'Escape') {
+                            setOpenMenuId(null);
+                          }
+                        }}
+                      >
+                        <button data-menu-item className="w-full text-left px-3 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none" onClick={() => handleEdit(r)}>Edit</button>
+                        <button data-menu-item className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none" onClick={() => handleDelete(r)}>Delete</button>
                       </div>
                     )}
                     <div className="leading-tight mb-2">
@@ -401,7 +539,9 @@ export default function DocumentTable({
                       {label && <div className="mt-0.5 text-gray-900 uppercase">{label}</div>}
                     </div>
                     {r.description && (
-                      <p className="text-sm text-gray-700 mb-3 line-clamp-3">{r.description}</p>
+                      <Tooltip content={r.description} placement="top">
+                        <p className="text-sm text-gray-700 mb-3 line-clamp-3 cursor-help">{r.description}</p>
+                      </Tooltip>
                     )}
                     <div className="mt-3 space-y-1 text-sm text-gray-700">
                       {r.documentDate && (
@@ -412,18 +552,22 @@ export default function DocumentTable({
                         </div>
                       )}
                       {(r.contributors && r.contributors.length > 0) && (
-                        <div className="flex items-center gap-2" title="Contributors">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                          <span className="text-gray-600 font-medium">Contributors:</span>
-                          <span className="text-gray-800">{(r.contributors ?? []).join(', ')}</span>
-                        </div>
+                        <Tooltip content={(r.contributors ?? []).join(', ')} placement="top">
+                          <div className="flex items-center gap-2 cursor-help">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            <span className="text-gray-600 font-medium">Contributors:</span>
+                            <span className="text-gray-800">{(r.contributors ?? []).join(', ')}</span>
+                          </div>
+                        </Tooltip>
                       )}
                       {r.updatedCreatedBy && (
-                        <div className="flex items-center gap-2" title="Updated & Created by">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-                          <span className="text-gray-600 font-medium">Updated / Created by:</span>
-                          <span className="text-gray-800">{r.updatedCreatedBy}</span>
-                        </div>
+                        <Tooltip content={`Update & Create by: ${r.updatedCreatedBy}`} placement="top">
+                          <div className="flex items-center gap-2 cursor-help">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-600"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                            <span className="text-gray-600 font-medium">Updated / Created by:</span>
+                            <span className="text-gray-800">{r.updatedCreatedBy}</span>
+                          </div>
+                        </Tooltip>
                       )}
                     </div>
                   </div>
@@ -463,5 +607,30 @@ export default function DocumentTable({
         </div>
       </div>
     </div>
+    <ConfirmDialog
+      open={confirmOpen}
+      title="Konfirmasi Hapus"
+      description="Apakah Anda yakin ingin menghapus dokumen ini? Tindakan ini tidak dapat dibatalkan."
+      confirmText="Hapus"
+      cancelText="Batal"
+      onConfirm={doConfirmDelete}
+      onCancel={cancelConfirmDelete}
+    />
+    </>
   );
+}
+
+function getArchiveBadgeClasses(name: string): string {
+  const map: Record<string, string> = {
+    personal: 'bg-rose-50 text-rose-700 border-rose-200',
+    finance: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    legal: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    operations: 'bg-amber-50 text-amber-700 border-amber-200',
+    marketing: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
+    it: 'bg-sky-50 text-sky-700 border-sky-200',
+    default: 'bg-blue-50 text-blue-700 border-blue-200',
+  };
+  const key = name.trim().toLowerCase();
+  const found = Object.keys(map).find(k => key.includes(k));
+  return map[found as keyof typeof map] ?? map.default;
 }
