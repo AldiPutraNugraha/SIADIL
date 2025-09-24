@@ -7,7 +7,12 @@ import { generateDocs } from '@/lib/documents';
 
 export default function PersonalPage() {
   const router = useRouter();
-  const rows = generateDocs(30, 'Personal');
+  const rows = generateDocs(30, 'Personal').map((r) => ({
+    ...r,
+    // For Personal archive, only show Aldi P. in these fields
+    contributors: ['Aldi P.'],
+    updatedCreatedBy: 'Aldi P.',
+  }));
   return (
     <div className="min-h-screen bg-white dark:bg-white text-gray-900">
       <div className="bg-white">
@@ -16,7 +21,7 @@ export default function PersonalPage() {
             <div>
               <h1 className="text-2xl font-bold">Personal</h1>
               <nav className="flex items-center space-x-2 text-sm mt-2">
-                <Link href="/siadil" className="text-gray-600 hover:underline">Company Archive</Link>
+                <Link href="/siadil" className="text-gray-600 hover:underline">Archive</Link>
                 <span className="text-gray-400">/</span>
                 <span className="text-gray-800">Personal</span>
               </nav>

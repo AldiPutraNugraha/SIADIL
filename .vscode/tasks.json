@@ -1,0 +1,35 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Next build (typecheck)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc",
+				"$eslint - stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Next dev",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"dev"
+			],
+			"isBackground": true,
+			"problemMatcher": [
+				"$tsc",
+				"$eslint - stylish"
+			],
+			"group": "build"
+		}
+	]
+}
