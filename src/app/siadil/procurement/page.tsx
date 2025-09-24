@@ -16,7 +16,7 @@ export default function ProcurementPage() {
             <div>
               <h1 className="text-2xl font-bold">Procurement</h1>
               <nav className="flex items-center space-x-2 text-sm mt-2">
-                <Link href="/siadil" className="text-gray-600 hover:underline">Company Archive</Link>
+                <Link href="/siadil" className="text-gray-600 hover:underline">Archive</Link>
                 <span className="text-gray-400">/</span>
                 <span className="text-gray-800">Procurement</span>
               </nav>
