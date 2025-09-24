@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Tooltip from './Tooltip';
 import ConfirmDialog from './ConfirmDialog';
 
@@ -9,6 +9,7 @@ export type DocumentRow = {
   numberTitle: string; // e.g., "IT-001 - SSL certificate"
   description?: string;
   documentDate?: string; // ISO or display date
+  expireDate?: string; // optional ISO date for expiry
   contributors?: string[]; // list of names or emails
   archive?: string; // folder/category
   updatedCreatedBy?: string; // e.g., "Adi P. / Nia K."
@@ -48,6 +49,20 @@ export default function DocumentTable({
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const pendingDeleteRef = useRef<DocumentRow | null>(null);
+  // filter popovers
+  const [openFilterPanel, setOpenFilterPanel] = useState(false);
+  const [openArchiveFilter, setOpenArchiveFilter] = useState(false);
+  const [openDocDateFilter, setOpenDocDateFilter] = useState(false);
+  const [openExpireDateFilter, setOpenExpireDateFilter] = useState(false);
+  const [openExpireInFilter, setOpenExpireInFilter] = useState(false);
+  const [openViewMenu, setOpenViewMenu] = useState(false);
+  // filters state
+  const [selectedArchives, setSelectedArchives] = useState<string[]>([]);
+  const [docDateFrom, setDocDateFrom] = useState<string>('');
+  const [docDateTo, setDocDateTo] = useState<string>('');
+  const [expireDateFrom, setExpireDateFrom] = useState<string>('');
+  const [expireDateTo, setExpireDateTo] = useState<string>('');
+  const [expireInDays, setExpireInDays] = useState<number | ''>('');
 
   // keep internal data in sync when rows prop changes
   useEffect(() => {
@@ -70,8 +85,20 @@ export default function DocumentTable({
         if (storedSortDir === 'asc' || storedSortDir === 'desc') setSortDir(storedSortDir);
         const storedPage = window.localStorage.getItem('docTable:page');
         const storedSearch = window.localStorage.getItem('docTable:search');
+        const storedArchives = window.localStorage.getItem('docTable:filter:archives');
+        const storedDocFrom = window.localStorage.getItem('docTable:filter:docFrom');
+        const storedDocTo = window.localStorage.getItem('docTable:filter:docTo');
+        const storedExpFrom = window.localStorage.getItem('docTable:filter:expFrom');
+        const storedExpTo = window.localStorage.getItem('docTable:filter:expTo');
+        const storedExpIn = window.localStorage.getItem('docTable:filter:expIn');
         if (storedPage) setPage(Math.max(1, Number(storedPage)));
         if (storedSearch) setSearch(storedSearch);
+        if (storedArchives) setSelectedArchives(JSON.parse(storedArchives));
+        if (storedDocFrom) setDocDateFrom(storedDocFrom);
+        if (storedDocTo) setDocDateTo(storedDocTo);
+        if (storedExpFrom) setExpireDateFrom(storedExpFrom);
+        if (storedExpTo) setExpireDateTo(storedExpTo);
+        if (storedExpIn) setExpireInDays(Number(storedExpIn) || '');
       }
     } catch {}
   }, []);
@@ -110,6 +137,25 @@ export default function DocumentTable({
       if (typeof window !== 'undefined') window.localStorage.setItem('docTable:search', search);
     } catch {}
   }, [search]);
+  // persist filters
+  useEffect(() => {
+    try { if (typeof window !== 'undefined') window.localStorage.setItem('docTable:filter:archives', JSON.stringify(selectedArchives)); } catch {}
+  }, [selectedArchives]);
+  useEffect(() => {
+    try { if (typeof window !== 'undefined') window.localStorage.setItem('docTable:filter:docFrom', docDateFrom); } catch {}
+  }, [docDateFrom]);
+  useEffect(() => {
+    try { if (typeof window !== 'undefined') window.localStorage.setItem('docTable:filter:docTo', docDateTo); } catch {}
+  }, [docDateTo]);
+  useEffect(() => {
+    try { if (typeof window !== 'undefined') window.localStorage.setItem('docTable:filter:expFrom', expireDateFrom); } catch {}
+  }, [expireDateFrom]);
+  useEffect(() => {
+    try { if (typeof window !== 'undefined') window.localStorage.setItem('docTable:filter:expTo', expireDateTo); } catch {}
+  }, [expireDateTo]);
+  useEffect(() => {
+    try { if (typeof window !== 'undefined') window.localStorage.setItem('docTable:filter:expIn', String(expireInDays || '')); } catch {}
+  }, [expireInDays]);
 
   // close menu on outside click / escape
   useEffect(() => {
@@ -120,10 +166,24 @@ export default function DocumentTable({
       // Close only if clicking outside the table/card container
       if (target && !el.contains(target)) {
         setOpenMenuId(null);
+        setOpenFilterPanel(false);
+        setOpenArchiveFilter(false);
+        setOpenDocDateFilter(false);
+        setOpenExpireDateFilter(false);
+        setOpenExpireInFilter(false);
+        setOpenViewMenu(false);
       }
     }
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpenMenuId(null);
+      if (e.key === 'Escape') {
+        setOpenMenuId(null);
+        setOpenFilterPanel(false);
+        setOpenArchiveFilter(false);
+        setOpenDocDateFilter(false);
+        setOpenExpireDateFilter(false);
+        setOpenExpireInFilter(false);
+        setOpenViewMenu(false);
+      }
     }
     document.addEventListener('click', onDocClick);
     document.addEventListener('keydown', onKey);
@@ -147,24 +207,70 @@ export default function DocumentTable({
     return () => document.removeEventListener('keydown', onSlash);
   }, []);
 
+  const parseDate = (s?: string) => {
+    if (!s) return NaN;
+    const t = Date.parse(s);
+    if (!Number.isNaN(t)) return t;
+    // try yyyy-mm-dd fallback
+    const m = s.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (m) return Date.parse(`${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`);
+    return NaN;
+  };
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    if (!term) return data;
-    return data.filter((r) =>
-      [
+    const termFilter = (r: DocumentRow) => {
+      if (!term) return true;
+      return [
         String(r.id),
         r.numberTitle,
         r.description ?? '',
-        r.documentDate ?? '',
+  r.documentDate ?? '',
+  r.expireDate ?? '',
         (r.contributors ?? []).join(' '),
         r.archive ?? '',
         r.updatedCreatedBy ?? '',
       ]
         .join(' ')
         .toLowerCase()
-        .includes(term)
-    );
-  }, [data, search]);
+        .includes(term);
+    };
+
+    const archiveFilter = (r: DocumentRow) => {
+      if (!selectedArchives.length) return true;
+      return selectedArchives.includes((r.archive ?? '').toString());
+    };
+
+    const docDateFilter = (r: DocumentRow) => {
+      if (!docDateFrom && !docDateTo) return true;
+      const t = parseDate(r.documentDate);
+      if (Number.isNaN(t)) return false;
+      const min = docDateFrom ? parseDate(docDateFrom) : -Infinity;
+      const max = docDateTo ? parseDate(docDateTo) : Infinity;
+      return t >= min && t <= max;
+    };
+
+    const expDateFilter = (r: DocumentRow) => {
+      if (!expireDateFrom && !expireDateTo) return true;
+      const exp = parseDate(r.expireDate);
+      if (Number.isNaN(exp)) return false;
+      const min = expireDateFrom ? parseDate(expireDateFrom) : -Infinity;
+      const max = expireDateTo ? parseDate(expireDateTo) : Infinity;
+      return exp >= min && exp <= max;
+    };
+
+    const expInFilter = (r: DocumentRow) => {
+      if (expireInDays === '' || expireInDays === undefined || expireInDays === null) return true;
+      const exp = parseDate(r.expireDate);
+      if (Number.isNaN(exp)) return false;
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const range = startOfToday + (Number(expireInDays) * 24 * 60 * 60 * 1000);
+      return exp >= startOfToday && exp <= range;
+    };
+
+    return data.filter((r) => termFilter(r) && archiveFilter(r) && docDateFilter(r) && expDateFilter(r) && expInFilter(r));
+  }, [data, search, selectedArchives, docDateFrom, docDateTo, expireDateFrom, expireDateTo, expireInDays]);
 
   const sorted = useMemo(() => {
     const copy = [...filtered];
@@ -226,6 +332,48 @@ export default function DocumentTable({
       </span>
     );
   };
+  // Export CSV of current filtered rows
+  const handleExport = useCallback(() => {
+    const rows = sorted; // export using current sorting & filters
+    const header = ['ID', 'Number & Title', 'Description', 'Document Date', 'Expire Date', 'Contributors', 'Archive', 'Updated/Created by'];
+    const csvRows: string[] = [];
+    csvRows.push(header.map((h) => '"' + h.replace(/"/g, '""') + '"').join(','));
+    rows.forEach((r) => {
+      const line = [
+        r.id,
+        r.numberTitle ?? '',
+        r.description ?? '',
+  r.documentDate ?? '',
+  r.expireDate ?? '',
+        (r.contributors ?? []).join(' | '),
+        r.archive ?? '',
+        r.updatedCreatedBy ?? '',
+      ].map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(',');
+      csvRows.push(line);
+    });
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeTitle = (title || 'documents').toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+    a.download = `${safeTitle}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [sorted, title]);
+
+  const clearAllFilters = () => {
+    setSelectedArchives([]);
+    setDocDateFrom('');
+    setDocDateTo('');
+    setExpireDateFrom('');
+    setExpireDateTo('');
+    setExpireInDays('');
+  };
+
+  const uniqueArchives = useMemo(() => Array.from(new Set(data.map(d => d.archive).filter(Boolean))) as string[], [data]);
+
 
   const handleEdit = (row: DocumentRow) => {
     if (onEdit) return onEdit(row);
@@ -334,14 +482,160 @@ export default function DocumentTable({
       </div>
 
       {/* filter chips row */}
-      <div className="flex flex-wrap items-center gap-3 mb-3">
-        <button className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white"><span>⚲</span> Filter document..</button>
-        <button className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white">＋ Archive</button>
-        <button className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white">＋ Document Date</button>
-        <button className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white">＋ Expire Date</button>
-        <button className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white">＋ Expire In</button>
-        <button className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white">⬇ Export</button>
-        <button className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white">☰ View</button>
+      <div className="relative flex flex-wrap items-center gap-3 mb-3">
+        {/* Filter overview */}
+        <div className="relative">
+          <button onClick={(e) => { e.stopPropagation(); setOpenFilterPanel((v) => !v); }} className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white transition hover:shadow-sm active:scale-95">
+            <span>⚲</span> Filter document..
+          </button>
+          {openFilterPanel && (
+            <div className="absolute z-20 mt-2 w-72 bg-white border rounded-lg shadow-lg p-3 animate-in fade-in zoom-in" style={{ animationDuration: '120ms' }}>
+              <div className="text-sm text-gray-700 font-medium mb-2">Applied Filters</div>
+              <ul className="text-sm text-gray-700 space-y-1 mb-3">
+                {selectedArchives.length > 0 && <li>Archive: {selectedArchives.join(', ')}</li>}
+                {(docDateFrom || docDateTo) && <li>Document Date: {docDateFrom || '...'} – {docDateTo || '...'}</li>}
+                {(expireDateFrom || expireDateTo) && <li>Expire Date: {expireDateFrom || '...'} – {expireDateTo || '...'}</li>}
+                {expireInDays !== '' && <li>Expire In: ≤ {expireInDays} day(s)</li>}
+                {selectedArchives.length === 0 && !docDateFrom && !docDateTo && !expireDateFrom && !expireDateTo && expireInDays === '' && (
+                  <li className="text-gray-500">No filters.</li>
+                )}
+              </ul>
+              <div className="flex justify-between">
+                <button className="px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50" onClick={() => { clearAllFilters(); setOpenFilterPanel(false); }}>Clear all</button>
+                <button className="px-3 py-1.5 text-sm text-white rounded-md" style={{ backgroundColor: '#01793b' }} onClick={() => setOpenFilterPanel(false)}>Close</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Archive filter */}
+        <div className="relative">
+          <button onClick={(e) => { e.stopPropagation(); setOpenArchiveFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${selectedArchives.length ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
+            ＋ Archive {selectedArchives.length ? <span className="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-blue-600 text-white">{selectedArchives.length}</span> : null}
+          </button>
+          {openArchiveFilter && (
+            <div className="absolute z-20 mt-2 w-56 bg-white border rounded-lg shadow-lg p-3">
+              <div className="text-sm text-gray-700 font-medium mb-2">Choose archives</div>
+              <div className="max-h-48 overflow-auto pr-1 space-y-2">
+                {uniqueArchives.length === 0 && <div className="text-sm text-gray-500">No archive options</div>}
+                {uniqueArchives.map((a) => {
+                  const checked = selectedArchives.includes(a);
+                  return (
+                    <label key={a} className="flex items-center gap-2 text-sm text-gray-700">
+                      <input type="checkbox" checked={checked} onChange={(e) => {
+                        setSelectedArchives((prev) => e.target.checked ? Array.from(new Set([...prev, a])) : prev.filter(x => x !== a));
+                        setPage(1);
+                      }} />
+                      <span>{a}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              <div className="mt-3 flex justify-between">
+                <button className="text-sm px-3 py-1.5 border rounded-md hover:bg-gray-50" onClick={() => setSelectedArchives([])}>Reset</button>
+                <button className="text-sm px-3 py-1.5 rounded-md text-white" style={{ backgroundColor: '#01793b' }} onClick={() => setOpenArchiveFilter(false)}>Apply</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Document Date range */}
+        <div className="relative">
+          <button onClick={(e) => { e.stopPropagation(); setOpenDocDateFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${(docDateFrom || docDateTo) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
+            ＋ Document Date
+          </button>
+          {openDocDateFilter && (
+            <div className="absolute z-20 mt-2 w-72 bg-white border rounded-lg shadow-lg p-3">
+              <div className="text-sm text-gray-700 font-medium mb-2">Document Date range</div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-gray-600">From</label>
+                  <input type="date" value={docDateFrom} onChange={(e) => { setDocDateFrom(e.target.value); setPage(1); }} className="mt-1 w-full border rounded-md px-2 py-1" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600">To</label>
+                  <input type="date" value={docDateTo} onChange={(e) => { setDocDateTo(e.target.value); setPage(1); }} className="mt-1 w-full border rounded-md px-2 py-1" />
+                </div>
+              </div>
+              <div className="mt-3 flex justify-between">
+                <button className="text-sm px-3 py-1.5 border rounded-md hover:bg-gray-50" onClick={() => { setDocDateFrom(''); setDocDateTo(''); }}>Reset</button>
+                <button className="text-sm px-3 py-1.5 rounded-md text-white" style={{ backgroundColor: '#01793b' }} onClick={() => setOpenDocDateFilter(false)}>Apply</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Expire Date range */}
+        <div className="relative">
+          <button onClick={(e) => { e.stopPropagation(); setOpenExpireDateFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${(expireDateFrom || expireDateTo) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
+            ＋ Expire Date
+          </button>
+          {openExpireDateFilter && (
+            <div className="absolute z-20 mt-2 w-72 bg-white border rounded-lg shadow-lg p-3">
+              <div className="text-sm text-gray-700 font-medium mb-2">Expire Date range</div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-gray-600">From</label>
+                  <input type="date" value={expireDateFrom} onChange={(e) => { setExpireDateFrom(e.target.value); setPage(1); }} className="mt-1 w-full border rounded-md px-2 py-1" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600">To</label>
+                  <input type="date" value={expireDateTo} onChange={(e) => { setExpireDateTo(e.target.value); setPage(1); }} className="mt-1 w-full border rounded-md px-2 py-1" />
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-gray-500">Catatan: baris tanpa Expire Date akan otomatis tidak terikut saat filter aktif.</div>
+              <div className="mt-2 flex justify-between">
+                <button className="text-sm px-3 py-1.5 border rounded-md hover:bg-gray-50" onClick={() => { setExpireDateFrom(''); setExpireDateTo(''); }}>Reset</button>
+                <button className="text-sm px-3 py-1.5 rounded-md text-white" style={{ backgroundColor: '#01793b' }} onClick={() => setOpenExpireDateFilter(false)}>Apply</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Expire In */}
+        <div className="relative">
+          <button onClick={(e) => { e.stopPropagation(); setOpenExpireInFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${(expireInDays !== '' && expireInDays !== undefined && expireInDays !== null) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
+            ＋ Expire In
+          </button>
+          {openExpireInFilter && (
+            <div className="absolute z-20 mt-2 w-56 bg-white border rounded-lg shadow-lg p-3">
+              <div className="text-sm text-gray-700 font-medium mb-2">Expire within</div>
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                {[7, 30, 90, 180, 365].map((d) => (
+                  <button key={d} className={`text-sm px-2 py-1 rounded-md border ${expireInDays === d ? 'bg-blue-600 text-white border-blue-600' : 'bg-white hover:bg-gray-50'}`} onClick={() => { setExpireInDays(d); setPage(1); }}>
+                    {d}d
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="number" min={1} placeholder="Custom days" value={expireInDays === '' ? '' : expireInDays} onChange={(e) => { const v = e.target.value; setExpireInDays(v ? Number(v) : ''); setPage(1); }} className="w-28 border rounded-md px-2 py-1" />
+                <button className="text-sm px-3 py-1.5 border rounded-md hover:bg-gray-50" onClick={() => setExpireInDays('')}>Clear</button>
+                <button className="text-sm px-3 py-1.5 rounded-md text-white" style={{ backgroundColor: '#01793b' }} onClick={() => setOpenExpireInFilter(false)}>Apply</button>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">Catatan: baris tanpa Expire Date tidak akan termasuk saat filter aktif.</div>
+            </div>
+          )}
+        </div>
+
+        {/* Export */}
+        <div className="relative">
+          <button onClick={handleExport} className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white transition hover:shadow-sm active:scale-95">
+            ⬇ Export
+          </button>
+        </div>
+
+        {/* View menu */}
+        <div className="relative">
+          <button onClick={(e) => { e.stopPropagation(); setOpenViewMenu((v) => !v); }} className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white transition hover:shadow-sm active:scale-95">
+            ☰ View
+          </button>
+          {openViewMenu && (
+            <div className="absolute z-20 mt-2 w-40 bg-white border rounded-lg shadow-lg p-2">
+              <button className={`w-full text-left px-3 py-2 rounded-md ${viewMode === 'list' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'}`} onClick={() => { setViewMode('list'); setOpenViewMenu(false); }}>List</button>
+              <button className={`w-full text-left px-3 py-2 rounded-md ${viewMode === 'card' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'}`} onClick={() => { setViewMode('card'); setOpenViewMenu(false); }}>Card</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* content area: table (list) or grid (card) */}
