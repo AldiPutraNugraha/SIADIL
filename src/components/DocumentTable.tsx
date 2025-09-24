@@ -51,6 +51,31 @@ export default function DocumentTable({
     setPage(1);
   }, [rows]);
 
+  // Muat preferensi view & page size dari localStorage (jika ada)
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const storedView = window.localStorage.getItem('docTable:viewMode');
+        if (storedView === 'list' || storedView === 'card') setViewMode(storedView);
+        const storedPageSize = window.localStorage.getItem('docTable:pageSize');
+        if (storedPageSize) setPageSize(Number(storedPageSize));
+      }
+    } catch {}
+  }, []);
+
+  // Simpan preferensi saat berubah
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') window.localStorage.setItem('docTable:viewMode', viewMode);
+    } catch {}
+  }, [viewMode]);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') window.localStorage.setItem('docTable:pageSize', String(pageSize));
+    } catch {}
+  }, [pageSize]);
+
   // close menu on outside click / escape
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -144,11 +169,14 @@ export default function DocumentTable({
     }
   };
 
-  const SortIcon = ({ col }: { col: SortKey }) => (
-    <span className="inline-block ml-1 text-gray-400">
-      {sortKey !== col ? '↕' : sortDir === 'asc' ? '▲' : '▼'}
-    </span>
-  );
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    const isActive = sortKey === col;
+    return (
+      <span className={`inline-block ml-1 ${isActive ? 'text-gray-700' : 'text-gray-400'}`} aria-hidden="true">
+        {isActive ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+      </span>
+    );
+  };
 
   const handleEdit = (row: DocumentRow) => {
     if (onEdit) return onEdit(row);
@@ -157,6 +185,8 @@ export default function DocumentTable({
 
   const handleDelete = async (row: DocumentRow) => {
     try {
+      const confirmed = typeof window === 'undefined' ? true : window.confirm(`Hapus dokumen ID ${row.id}?`);
+      if (!confirmed) return;
       if (onDelete) {
         await onDelete(row);
       } else {
@@ -246,7 +276,7 @@ export default function DocumentTable({
       {viewMode === 'list' ? (
         <div className="overflow-auto border rounded-lg">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-gray-700">
+            <thead className="bg-gray-50 text-gray-700 sticky top-0 z-10">
               <tr>
                 <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('id')}>ID <SortIcon col="id" /></th>
                 <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('numberTitle')}>Number & Title <SortIcon col="numberTitle" /></th>
@@ -261,7 +291,18 @@ export default function DocumentTable({
             <tbody className="divide-y">
               {viewRows.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-6 text-center text-gray-500" colSpan={8}>No documents found.</td>
+                  <td className="px-4 py-6 text-center text-gray-500" colSpan={8}>
+                    No documents found.
+                    <div className="mt-3">
+                      <button
+                        className="inline-flex items-center px-3 py-1.5 text-white text-sm font-medium rounded-md"
+                        style={{ backgroundColor: '#01793b' }}
+                        onClick={() => (onAddNew ? onAddNew() : alert('Add New Document pressed'))}
+                      >
+                        + Add New Document
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ) : (
                 viewRows.map((r) => (
@@ -282,19 +323,35 @@ export default function DocumentTable({
                     </td>
                     <td className="px-4 py-2 align-top text-gray-700 max-w-xl">{r.description}</td>
                     <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">{r.documentDate}</td>
-                    <td className="px-4 py-2 align-top text-gray-700">{(r.contributors ?? []).join(', ')}</td>
-                    <td className="px-4 py-2 align-top text-gray-700">{r.archive}</td>
-                    <td className="px-4 py-2 align-top text-gray-700">{r.updatedCreatedBy}</td>
+                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap" title={(r.contributors ?? []).join(', ')}>
+                      <div className="flex flex-wrap gap-1">
+                        {(r.contributors ?? []).map((name, idx) => (
+                          <span key={`${r.id}-c-${idx}`} className="inline-flex items-center px-2 py-0.5 text-xs rounded-full border bg-gray-50 text-gray-700">
+                            {name}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 align-top text-gray-700">
+                      {r.archive ? (
+                        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full border bg-gray-50 text-gray-700" title={r.archive}>
+                          {r.archive}
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap" title={r.updatedCreatedBy}>{r.updatedCreatedBy}</td>
                     <td className="px-4 py-2 align-top text-right relative" onClick={(e) => e.stopPropagation()}>
                       <button
                         aria-label="More actions"
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim"
+                        title="More actions"
+                        aria-expanded={openMenuId === r.id}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
                       >
                         ⋯
                       </button>
                       {openMenuId === r.id && (
-                        <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-20">
+                        <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Row actions menu">
                           <button className="w-full text-left px-3 py-2 hover:bg-gray-50" onClick={() => handleEdit(r)}>Edit</button>
                           <button className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50" onClick={() => handleDelete(r)}>Delete</button>
                         </div>
@@ -324,7 +381,9 @@ export default function DocumentTable({
                         {r.archive && <span className="text-xs text-gray-600 hidden sm:inline">{r.archive}</span>}
                         <button
                           aria-label="More actions"
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim"
+                          title="More actions"
+                          aria-expanded={openMenuId === r.id}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                           onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
                         >
                           ⋯
@@ -332,7 +391,7 @@ export default function DocumentTable({
                       </div>
                     </div>
                     {openMenuId === r.id && (
-                      <div className="absolute right-2 top-10 w-40 bg-white border rounded-md shadow-lg z-20">
+                      <div className="absolute right-2 top-10 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Card actions menu">
                         <button className="w-full text-left px-3 py-2 hover:bg-gray-50" onClick={() => handleEdit(r)}>Edit</button>
                         <button className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50" onClick={() => handleDelete(r)}>Delete</button>
                       </div>
