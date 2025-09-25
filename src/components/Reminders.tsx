@@ -192,13 +192,15 @@ export default function Reminders({ title = "Reminders", rows, dangerDays = 14, 
             <div className="max-h-[70vh] overflow-auto p-4">
               <div className="space-y-3">
                 {/* Grouped sections */}
-                {counts.red > 0 && (
+                {counts.redUpcoming > 0 && (
                   <div>
-                    <h3 className="text-sm font-semibold text-red-600 mb-2">Urgent ({counts.red}) · Upcoming {counts.redUpcoming}{counts.redExpired?`, Expired ${counts.redExpired}`:''}</h3>
+                    <h3 className="text-sm font-semibold text-red-600 mb-2">Urgent ({counts.redUpcoming})</h3>
                     <div className="space-y-3" role="list">
-                      {reminders.filter(r=>r.status==='red').map(({ row, diffDays, status }) => (
-                        <ReminderCard key={`all-red-${row.id}`} row={row} diffDays={diffDays} status={status as 'red'} fullWidth onClick={handleCardClick} />
-                      ))}
+                      {reminders
+                        .filter(r=>r.status==='red' && r.diffDays >= 0)
+                        .map(({ row, diffDays, status }) => (
+                          <ReminderCard key={`all-red-up-${row.id}`} row={row} diffDays={diffDays} status={status as 'red'} fullWidth onClick={handleCardClick} />
+                        ))}
                     </div>
                   </div>
                 )}
@@ -209,6 +211,18 @@ export default function Reminders({ title = "Reminders", rows, dangerDays = 14, 
                       {reminders.filter(r=>r.status==='yellow').map(({ row, diffDays, status }) => (
                         <ReminderCard key={`all-yellow-${row.id}`} row={row} diffDays={diffDays} status={status as 'yellow'} fullWidth onClick={handleCardClick} />
                       ))}
+                    </div>
+                  </div>
+                )}
+                {counts.redExpired > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-sm font-semibold text-gray-800 mb-2">Expired ({counts.redExpired})</h3>
+                    <div className="space-y-3" role="list">
+                      {reminders
+                        .filter(r=>r.status==='red' && r.diffDays < 0)
+                        .map(({ row, diffDays, status }) => (
+                          <ReminderCard key={`all-red-exp-${row.id}`} row={row} diffDays={diffDays} status={status as 'red'} fullWidth onClick={handleCardClick} />
+                        ))}
                     </div>
                   </div>
                 )}
