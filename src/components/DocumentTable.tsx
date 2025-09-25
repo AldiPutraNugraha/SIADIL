@@ -355,9 +355,9 @@ export default function DocumentTable({
       </span>
     );
   };
-  // Export CSV of current filtered rows
+  // Export CSV dari baris yang sedang terlihat (terfilter + tersortir)
   const handleExport = useCallback(() => {
-    const rows = sorted; // export using current sorting & filters
+    const rows = sorted;
     const header = ['ID', 'Number & Title', 'Description', 'Document Date', 'Expire Date', 'Contributors', 'Archive', 'Updated/Created by'];
     const csvRows: string[] = [];
     csvRows.push(header.map((h) => '"' + h.replace(/"/g, '""') + '"').join(','));
@@ -366,25 +366,49 @@ export default function DocumentTable({
         r.id,
         r.numberTitle ?? '',
         r.description ?? '',
-  r.documentDate ?? '',
-  r.expireDate ?? '',
+        r.documentDate ?? '',
+        r.expireDate ?? '',
         (r.contributors ?? []).join(' | '),
         r.archive ?? '',
         r.updatedCreatedBy ?? '',
       ].map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(',');
       csvRows.push(line);
     });
+
+    // Penamaan file yang informatif:
+    // - Jika filter arsip hanya satu -> pakai nama arsip tsb.
+    // - Jika hasil data hanya punya satu arsip -> pakai arsip itu.
+    // - Jika campur -> pakai 'all-archives' atau fallback ke title.
+    const archives = rows.map((r) => r.archive).filter((a): a is string => Boolean(a && a.trim()));
+    const norm = (s: string) => s.trim().toLowerCase();
+    const uniqueNorm = Array.from(new Set(archives.map(norm)));
+
+    let baseName: string | undefined;
+    if (selectedArchives.length === 1) {
+      baseName = selectedArchives[0];
+    } else if (uniqueNorm.length === 1 && archives.length > 0) {
+      baseName = archives.find((a) => norm(a) === uniqueNorm[0]) || archives[0];
+    } else if (archives.length > 0) {
+      baseName = 'all-archives';
+    }
+
+    const fallback = title || 'documents';
+    const rawName = baseName || fallback;
+    const toSlug = (s: string) => s
+      .toLowerCase()
+      .replace(/[^a-z0-9-_]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
     const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const safeTitle = (title || 'documents').toLowerCase().replace(/[^a-z0-9-_]/g, '-');
-    a.download = `${safeTitle}.csv`;
+  a.download = `${toSlug(rawName)}_document.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [sorted, title]);
+  }, [sorted, title, selectedArchives]);
 
   const clearAllFilters = () => {
     setSelectedArchives([]);
