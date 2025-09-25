@@ -91,6 +91,35 @@
   background-color: transparent !important; /* biarkan warna container terlihat */
 }
 
+/* Expired reminder dark card stabilization */
+.reminder-expired {
+  background-color: #1f2937 !important; /* gray-800 */
+  border-color: #111827 !important; /* gray-900 */
+  color: #fff !important;
+}
+.reminder-expired *,
+.reminder-expired *::before,
+.reminder-expired *::after {
+  background-color: transparent !important;
+}
+
+/* ===== Reminders Tabs: force active colors so text never disappears ===== */
+.reminder-tab-urgent-active {
+  background-color: #ef4444 !important; /* red-500 */
+  border-color: #dc2626 !important;     /* red-600 */
+  color: #ffffff !important;
+}
+.reminder-tab-warning-active {
+  background-color: #fde68a !important; /* yellow-200 */
+  border-color: #f59e0b !important;     /* amber-500 as border */
+  color: #111827 !important;            /* gray-900 */
+}
+.reminder-tab-expired-active {
+  background-color: #1f2937 !important; /* gray-800 */
+  border-color: #111827 !important;     /* gray-900 */
+  color: #ffffff !important;
+}
+
 /* ===== Animasi klik untuk tombol tiga titik (ellipsis menu) ===== */
 @keyframes clickPulse {
   0% { transform: scale(1); }

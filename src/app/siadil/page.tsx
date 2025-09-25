@@ -249,7 +249,20 @@ export default function SiadilPage() {
 
           {/* Reminders Column (single card viewport + scroll + View All) */}
           <div className="flex flex-col items-start lg:pl-32 xl:pl-48">
-            <Reminders title="Reminders" rows={reminderRows} singleCardViewport cardWidth={320} />
+            <Reminders
+              title="Reminders"
+              rows={reminderRows}
+              singleCardViewport
+              cardWidth={320}
+              showLegend
+              enableFilter
+              enableHideExpired
+              persistStateKey="reminders:root:filters"
+              onCardClick={(row)=>{
+                // Placeholder: integrasi ke DocumentDetailModal bisa ditambahkan
+                console.log('Reminder clicked', row.numberTitle);
+              }}
+            />
           </div>
           
         </div>

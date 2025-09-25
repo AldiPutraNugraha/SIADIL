@@ -13,12 +13,36 @@ type Props = {
   showLegend?: boolean; // tampilkan legend warna
   enableFilter?: boolean; // tampilkan toggle filter urgent/warning
   onCardClick?: (row: DocumentRow) => void; // klik kartu callback (bisa buka detail)
+  enableHideExpired?: boolean; // tampilkan toggle hide expired urgent
+  persistStateKey?: string; // nama key localStorage untuk simpan filter state
 };
 
-export default function Reminders({ title = "Reminders", rows, dangerDays = 14, warningDays = 60, singleCardViewport = false, cardWidth = 360, showLegend = false, enableFilter = false, onCardClick }: Props) {
+export default function Reminders({ title = "Reminders", rows, dangerDays = 14, warningDays = 60, singleCardViewport = false, cardWidth = 360, showLegend = false, enableFilter = false, onCardClick, enableHideExpired=false, persistStateKey }: Props) {
   const [openAll, setOpenAll] = useState(false);
   const [showUrgent, setShowUrgent] = useState(true);
   const [showWarning, setShowWarning] = useState(true);
+  const [showExpiredOnly, setShowExpiredOnly] = useState(false); // true = tampilkan hanya expired (urgent)
+
+  // Load persisted state
+  React.useEffect(() => {
+    if (!persistStateKey) return;
+    try {
+      const raw = localStorage.getItem(persistStateKey);
+      if (raw) {
+        const obj = JSON.parse(raw);
+        if (typeof obj.showUrgent === 'boolean') setShowUrgent(obj.showUrgent);
+        if (typeof obj.showWarning === 'boolean') setShowWarning(obj.showWarning);
+  if (typeof obj.showExpiredOnly === 'boolean') setShowExpiredOnly(obj.showExpiredOnly);
+      }
+    } catch {}
+  }, [persistStateKey]);
+  // Persist on change
+  React.useEffect(() => {
+    if (!persistStateKey) return;
+    try {
+  localStorage.setItem(persistStateKey, JSON.stringify({ showUrgent, showWarning, showExpiredOnly }));
+    } catch {}
+  }, [showUrgent, showWarning, showExpiredOnly, persistStateKey]);
 
   const reminders = useMemo(() => {
     const today = startOfToday();
@@ -61,14 +85,35 @@ export default function Reminders({ title = "Reminders", rows, dangerDays = 14, 
   }, [rows, dangerDays, warningDays]);
 
   const counts = useMemo(() => {
-    let red = 0, yellow = 0;
+    let red = 0, redUpcoming=0, redExpired=0, yellow = 0;
     for (const r of reminders) {
-      if (r.status === 'red') red++; else if (r.status === 'yellow') yellow++;
+      if (r.status === 'red') {
+        red++;
+        if (r.diffDays < 0) redExpired++; else redUpcoming++;
+      } else if (r.status === 'yellow') yellow++;
     }
-    return { red, yellow, total: reminders.length };
+    return { red, yellow, total: reminders.length, redUpcoming, redExpired };
   }, [reminders]);
 
-  const filtered = useMemo(() => reminders.filter(r => (r.status === 'red' && showUrgent) || (r.status === 'yellow' && showWarning)), [reminders, showUrgent, showWarning]);
+  const filtered = useMemo(() => reminders.filter(r => {
+    // Expired-only tab: tampilkan hanya urgent yang sudah expired
+    if (showExpiredOnly) {
+      return r.status === 'red' && r.diffDays < 0;
+    }
+    // Tab mode eksklusif:
+    // - Urgent tab: hanya urgent yang BELUM expired (upcoming)
+    if (showUrgent && !showWarning) {
+      return r.status === 'red' && r.diffDays >= 0;
+    }
+    // - Warning tab: hanya yellow
+    if (showWarning && !showUrgent) {
+      return r.status === 'yellow';
+    }
+    // Jika keduanya aktif (mis. default atau state lama), tampilkan semua sesuai toggle
+    if (r.status === 'red') return showUrgent;
+    if (r.status === 'yellow') return showWarning;
+    return false;
+  }), [reminders, showUrgent, showWarning, showExpiredOnly]);
 
   const handleCardClick = useCallback((row: DocumentRow) => { if (onCardClick) onCardClick(row); }, [onCardClick]);
 
@@ -81,18 +126,43 @@ export default function Reminders({ title = "Reminders", rows, dangerDays = 14, 
         <div className="flex items-center gap-4">
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
           {showLegend && (
-            <div className="flex items-center gap-4 text-xs text-gray-600">
-              <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-red-500 inline-block" /> Urgent ({counts.red})</span>
-              <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-yellow-300 inline-block border border-yellow-500" /> Warning ({counts.yellow})</span>
-              <span className="inline-flex items-center">Total {counts.total}</span>
+            <div className="flex flex-col gap-1 text-[11px] text-gray-600">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-red-500 inline-block" /> Urgent {counts.red}</span>
+                <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-yellow-300 inline-block border border-yellow-500" /> Warning {counts.yellow}</span>
+                <span className="inline-flex items-center">Total {counts.total}</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> Upcoming {counts.redUpcoming}</span>
+                <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-800 inline-block" /> Expired {counts.redExpired}</span>
+              </div>
             </div>
           )}
         </div>
         <div className="flex items-center gap-3">
           {enableFilter && (
             <div className="flex items-center gap-2 text-xs">
-              <button onClick={() => setShowUrgent(v=>!v)} className={`px-2 py-1 rounded border text-[11px] font-medium ${showUrgent? 'bg-red-500 text-white border-red-600':'bg-white text-gray-600 hover:bg-red-50'}`}>Urgent</button>
-              <button onClick={() => setShowWarning(v=>!v)} className={`px-2 py-1 rounded border text-[11px] font-medium ${showWarning? 'bg-yellow-300 border-yellow-500 text-gray-900':'bg-white text-gray-600 hover:bg-yellow-50'}`}>Warning</button>
+              <button
+                onClick={() => { setShowUrgent(true); setShowWarning(false); setShowExpiredOnly(false); }}
+                className={`px-2 py-1 rounded border text-[11px] font-medium ${showUrgent && !showExpiredOnly ? 'reminder-tab-urgent-active' : 'bg-white text-gray-600 hover:bg-red-50'}`}
+              >
+                Urgent
+              </button>
+              <button
+                onClick={() => { setShowWarning(true); setShowUrgent(false); setShowExpiredOnly(false); }}
+                className={`px-2 py-1 rounded border text-[11px] font-medium ${showWarning && !showExpiredOnly ? 'reminder-tab-warning-active' : 'bg-white text-gray-600 hover:bg-yellow-50'}`}
+              >
+                Warning
+              </button>
+              {enableHideExpired && (
+                <button
+                  onClick={() => { setShowExpiredOnly(true); setShowUrgent(false); setShowWarning(false); }}
+                  className={`px-2 py-1 rounded border text-[11px] font-medium ${showExpiredOnly ? 'reminder-tab-expired-active' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                  title="Show only expired (urgent) documents"
+                >
+                  Expired
+                </button>
+              )}
             </div>
           )}
           <button className="text-green-700 hover:underline" onClick={() => setOpenAll(true)}>View All ({counts.total})</button>
@@ -124,7 +194,7 @@ export default function Reminders({ title = "Reminders", rows, dangerDays = 14, 
                 {/* Grouped sections */}
                 {counts.red > 0 && (
                   <div>
-                    <h3 className="text-sm font-semibold text-red-600 mb-2">Urgent ({counts.red})</h3>
+                    <h3 className="text-sm font-semibold text-red-600 mb-2">Urgent ({counts.red}) · Upcoming {counts.redUpcoming}{counts.redExpired?`, Expired ${counts.redExpired}`:''}</h3>
                     <div className="space-y-3" role="list">
                       {reminders.filter(r=>r.status==='red').map(({ row, diffDays, status }) => (
                         <ReminderCard key={`all-red-${row.id}`} row={row} diffDays={diffDays} status={status as 'red'} fullWidth onClick={handleCardClick} />
@@ -157,9 +227,21 @@ export default function Reminders({ title = "Reminders", rows, dangerDays = 14, 
 function ReminderCard({ row, diffDays, status, fullWidth = false, widthPx, onClick }: { row: DocumentRow; diffDays: number; status: "red" | "yellow"; fullWidth?: boolean; widthPx?: number; onClick?: (row: DocumentRow)=>void }) {
   const isExpired = diffDays < 0;
   const { code, label } = splitNumberTitle(row.numberTitle);
-  // Untuk kartu kuning, cukup gunakan background di container luar agar solid penuh (seperti kartu merah)
-  const bg = status === "red" ? "bg-red-500 text-white border-red-600" : "reminder-yellow text-gray-900 border-yellow-300";
-  const iconBg = status === "red" ? "bg-white/10 border-white/30 text-white" : "bg-yellow-500/30 border-yellow-700 text-yellow-900";
+  // Styling khusus expired urgent -> #1f2937 (gray-800)
+  let bg = '';
+  let iconBg = '';
+  if (status === 'yellow') {
+    bg = 'reminder-yellow text-gray-900 border-yellow-300';
+    iconBg = 'bg-yellow-500/30 border-yellow-700 text-yellow-900';
+  } else { // red family
+    if (isExpired) {
+      bg = 'reminder-expired text-white';
+      iconBg = 'bg-white/10 border-white/30 text-white';
+    } else {
+      bg = 'bg-red-500 text-white border-red-600';
+      iconBg = 'bg-white/10 border-white/30 text-white';
+    }
+  }
 
   const interactive = !!onClick;
   return (
@@ -182,9 +264,9 @@ function ReminderCard({ row, diffDays, status, fullWidth = false, widthPx, onCli
           </svg>
         </div>
   <div className="flex-1 min-w-0"> 
-          <div className={`font-semibold ${status === "red" ? "text-white" : "text-red-700"}`}>{code || label || row.numberTitle}</div>
-          <div className={`${status === "red" ? "text-white/90" : "text-gray-800"} truncate`}>{label || row.description || row.numberTitle}</div>
-          <div className={`${status === "red" ? "text-white/90" : "text-gray-700"} text-sm mt-1`}>
+          <div className={`font-semibold ${status === 'red' ? 'text-white' : 'text-red-700'}`}>{code || label || row.numberTitle}</div>
+          <div className={`${status === 'red' ? 'text-white/90' : 'text-gray-800'} truncate`}>{label || row.description || row.numberTitle}</div>
+          <div className={`${status === 'red' ? 'text-white/90' : 'text-gray-700'} text-sm mt-1`}>
             {isExpired ? (
               <>This document expired {formatDuration(Math.abs(diffDays))} ago</>
             ) : status === 'red' ? (
