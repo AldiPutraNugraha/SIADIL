@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useCallback } from "react";
+import Image from 'next/image';
 import type { DocumentRow } from "./DocumentTable";
 
 type Props = {
@@ -130,11 +131,8 @@ export default function Reminders({ title = "Reminders", rows, dangerDays = 14, 
               <div className="flex flex-wrap items-center gap-4">
                 <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-red-500 inline-block" /> Urgent {counts.red}</span>
                 <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-yellow-300 inline-block border border-yellow-500" /> Warning {counts.yellow}</span>
+                <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: '#1f2937', border: '1px solid #111827' }} /> Expired {counts.redExpired}</span>
                 <span className="inline-flex items-center">Total {counts.total}</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> Upcoming {counts.redUpcoming}</span>
-                <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-800 inline-block" /> Expired {counts.redExpired}</span>
               </div>
             </div>
           )}
@@ -165,7 +163,17 @@ export default function Reminders({ title = "Reminders", rows, dangerDays = 14, 
               )}
             </div>
           )}
-          <button className="text-green-700 hover:underline" onClick={() => setOpenAll(true)}>View All ({counts.total})</button>
+          <button
+            className="btn-ripple group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-600 text-green-700 bg-white hover:bg-green-50 hover:shadow-sm active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-green-600"
+            onClick={() => setOpenAll(true)}
+            aria-label={`View all reminders (${counts.total})`}
+            title="View all reminders"
+          >
+            <span className="link-underline-anim">View All ({counts.total})</span>
+            <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -246,14 +254,15 @@ function ReminderCard({ row, diffDays, status, fullWidth = false, widthPx, onCli
   let iconBg = '';
   if (status === 'yellow') {
     bg = 'reminder-yellow text-gray-900 border-yellow-300';
-    iconBg = 'bg-yellow-500/30 border-yellow-700 text-yellow-900';
+    iconBg = 'reminder-icon bg-white border-yellow-700';
   } else { // red family
     if (isExpired) {
       bg = 'reminder-expired text-white';
-      iconBg = 'bg-white/10 border-white/30 text-white';
+      // Solid white circle so black PNG icon is clearly visible on dark card
+      iconBg = 'reminder-icon bg-white border-gray-400';
     } else {
       bg = 'bg-red-500 text-white border-red-600';
-      iconBg = 'bg-white/10 border-white/30 text-white';
+      iconBg = 'reminder-icon bg-white border-white/70';
     }
   }
 
@@ -270,12 +279,13 @@ function ReminderCard({ row, diffDays, status, fullWidth = false, widthPx, onCli
     > 
   <div className="flex items-start gap-3">
   <div className={`w-10 h-10 rounded-full border flex items-center justify-center ${iconBg}`} aria-hidden="true">
-          {/* icon */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 9v4" />
-            <circle cx="12" cy="17" r="1" />
-            <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-          </svg>
+          <Image
+            src={status === 'yellow' ? '/warning.png' : (isExpired ? '/expired3.png' : '/urgent.png')}
+            alt={status === 'yellow' ? 'Warning' : (isExpired ? 'Expired' : 'Urgent')}
+            width={20}
+            height={20}
+            className="w-5 h-5 object-contain"
+          />
         </div>
   <div className="flex-1 min-w-0"> 
           <div className={`font-semibold ${status === 'red' ? 'text-white' : 'text-red-700'}`}>{code || label || row.numberTitle}</div>

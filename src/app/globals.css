@@ -162,3 +162,33 @@
 .btn-ellipsis-anim:active {
   animation: clickPulse 0.2s ease-out;
 }
+
+/* Animated underline used in "View All" */
+.link-underline-anim {
+  position: relative;
+}
+.link-underline-anim::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 100%;
+  background-color: #01793b; /* same green */
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms ease;
+}
+.group:hover .link-underline-anim::after {
+  transform: scaleX(1);
+}
+
+/* Ensure the circular icon container stays white for clarity */
+.reminder-icon {
+  background-color: #ffffff !important;
+}
+
+/* Keep reminder icon background white for visibility on dark cards */
+.reminder-icon {
+  background-color: #ffffff !important;
+}
