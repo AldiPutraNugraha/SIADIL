@@ -80,6 +80,17 @@
   background-color: transparent !important;
 }
 
+/* ===== Reminders Yellow Card Normalization ===== */
+/* Pastikan kartu kuning tidak muncul blok putih setelah refresh atau toggle tema */
+.reminder-yellow {
+  background-color: #fde68a !important; /* yellow-200 custom */
+}
+.reminder-yellow *,
+.reminder-yellow *::before,
+.reminder-yellow *::after {
+  background-color: transparent !important; /* biarkan warna container terlihat */
+}
+
 /* ===== Animasi klik untuk tombol tiga titik (ellipsis menu) ===== */
 @keyframes clickPulse {
   0% { transform: scale(1); }

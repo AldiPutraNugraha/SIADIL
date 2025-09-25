@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Reminders from '@/components/Reminders';
-import { generateDocs } from '@/lib/documents';
+import { DocumentRow } from '@/components/DocumentTable';
 
 export default function SiadilPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,14 +82,26 @@ export default function SiadilPage() {
     );
   };
 
-  // Kumpulan rows untuk Reminders di halaman utama (gabungan beberapa arsip yang relevan)
-  const reminderRows = useMemo(() => {
-    // Ambil sebagian kecil dokumen dari arsip yang sering punya expireDate
-    return [
-      ...generateDocs(8, 'Licenses'),
-      ...generateDocs(6, 'IT Security'),
-      ...generateDocs(6, 'Teknologi, Informasi & Komunikasi'),
-    ];
+  // Fixed 15 reminder rows (deterministic) agar jumlah Reminders selalu 15
+  const reminderRows: DocumentRow[] = useMemo(() => {
+    const today = new Date();
+    const offsets = [-7, -3, 0, 2, 4, 6, 9, 12, 16, 20, 25, 30, 40, 50, 55]; // semua masuk red/yellow threshold
+    return offsets.map((offset, idx) => {
+      const expire = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
+      const mm = String(expire.getMonth() + 1).padStart(2, '0');
+      const dd = String(expire.getDate()).padStart(2, '0');
+      const expireDate = `${expire.getFullYear()}-${mm}-${dd}`;
+      return {
+        id: idx + 1,
+        numberTitle: `RM-${String(idx + 1).padStart(3, '0')} • REMINDER DOC ${idx + 1}`,
+        description: 'Fixed reminder item',
+        documentDate: `${today.getFullYear()}-01-01`,
+        expireDate,
+        contributors: ['System'],
+        archive: 'Root',
+        updatedCreatedBy: 'System / System',
+      } as DocumentRow;
+    });
   }, []);
 
   return (
