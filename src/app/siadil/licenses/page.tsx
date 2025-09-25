@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import DocumentTable from '@/components/DocumentTable';
+import Reminders from '@/components/Reminders';
 import { generateDocs } from '@/lib/documents';
 
 export default function LicensesPage() {
@@ -38,6 +39,8 @@ export default function LicensesPage() {
             </svg>
           </button>
         </div>
+        {/* Reminders slider */}
+        <Reminders title="Reminders" rows={rows} />
         <DocumentTable title="Document" rows={rows} />
       </div>
     </div>

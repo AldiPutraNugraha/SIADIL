@@ -14,6 +14,7 @@ export function generateDocs(count: number, archiveTitle: string): DocumentRow[]
       numberTitle: `${prefix}-${padded} • ${codeLabel}`,
       description,
       documentDate: randomDateThisYear(),
+      expireDate: maybeExpireDate(archiveTitle),
       contributors: sampleContributors(i),
       archive: archiveTitle,
       updatedCreatedBy: sampleUpdatedBy(i),
@@ -38,6 +39,23 @@ function randomDateThisYear(): string {
   const end = new Date(now.getFullYear(), 11, 31).getTime();
   const t = Math.floor(Math.random() * (end - start)) + start;
   const d = new Date(t);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+// Generate expire date with some variation. For archives like Licenses/Security/TIK,
+// tambahkan expireDate lebih sering agar Reminders lebih kaya.
+function maybeExpireDate(archiveTitle: string): string | undefined {
+  const t = archiveTitle.toLowerCase();
+  const bias = (t.includes('license') || t.includes('security') || t.includes('tik') || t.includes('technology')) ? 0.85 : 0.5;
+  const include = Math.random() < bias;
+  if (!include) return undefined;
+
+  const today = new Date();
+  // rentang -120 .. +180 hari
+  const offsetDays = Math.floor(Math.random() * 300) - 120;
+  const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offsetDays);
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   return `${d.getFullYear()}-${mm}-${dd}`;

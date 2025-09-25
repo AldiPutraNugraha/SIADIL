@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Reminders from '@/components/Reminders';
+import { generateDocs } from '@/lib/documents';
 
 export default function SiadilPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,6 +82,16 @@ export default function SiadilPage() {
     );
   };
 
+  // Kumpulan rows untuk Reminders di halaman utama (gabungan beberapa arsip yang relevan)
+  const reminderRows = useMemo(() => {
+    // Ambil sebagian kecil dokumen dari arsip yang sering punya expireDate
+    return [
+      ...generateDocs(8, 'Licenses'),
+      ...generateDocs(6, 'IT Security'),
+      ...generateDocs(6, 'Teknologi, Informasi & Komunikasi'),
+    ];
+  }, []);
+
   return (
     <div className="min-h-screen bg-white dark:bg-white text-gray-900">
       {/* Header Section */}
@@ -143,8 +155,8 @@ export default function SiadilPage() {
       {/* Main Content */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* My Archive and Reminders Section - Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+  {/* My Archive and Reminders Section - Side by Side */}
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           
           {/* My Archive Column */}
           <div>
@@ -223,37 +235,9 @@ export default function SiadilPage() {
             </div>
           </div>
 
-          {/* Reminders Column */}
+          {/* Reminders Column (single card viewport + scroll + View All) */}
           <div className="flex flex-col items-start lg:pl-32 xl:pl-48">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              Reminders
-            </h2>
-            
-            <div className="grid grid-cols-1 gap-6 w-full">
-              {/* SSL Reminder */}
-              <div className="bg-red-500 rounded-lg shadow-sm border border-red-600 p-4 min-h-[120px] flex items-start w-full max-w-xs">
-                <div className="flex items-start w-full">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
-                      <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="ml-3 flex-1" style={{ background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                    <h3 className="text-sm font-medium text-white" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                      SSL01
-                    </h3>
-                    <p className="text-xs text-white mt-1" style={{ color: 'white !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                      SSL pupuk-kujang.co.id (Non GCP)
-                    </p>
-                    <p className="text-xs text-red-100 mt-2" style={{ color: '#fecaca !important', background: 'transparent !important', backgroundColor: 'transparent !important' }}>
-                      This document is expired 3 months ago
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Reminders title="Reminders" rows={reminderRows} singleCardViewport cardWidth={320} />
           </div>
           
         </div>
