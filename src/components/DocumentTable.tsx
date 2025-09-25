@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Tooltip from './Tooltip';
 import ConfirmDialog from './ConfirmDialog';
+import DocumentDetailModal from './DocumentDetailModal';
 
 export type DocumentRow = {
   id: string | number;
@@ -49,6 +50,8 @@ export default function DocumentTable({
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const pendingDeleteRef = useRef<DocumentRow | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<DocumentRow | null>(null);
   // filter popovers
   const [openFilterPanel, setOpenFilterPanel] = useState(false);
   const [openArchiveFilter, setOpenArchiveFilter] = useState(false);
@@ -56,6 +59,15 @@ export default function DocumentTable({
   const [openExpireDateFilter, setOpenExpireDateFilter] = useState(false);
   const [openExpireInFilter, setOpenExpireInFilter] = useState(false);
   const [openViewMenu, setOpenViewMenu] = useState(false);
+  // Column visibility
+  const [columns, setColumns] = useState({
+    title: true,
+    description: true,
+    documentDate: true,
+    contributors: true,
+    archive: true,
+    lastUpdated: true,
+  });
   // filters state
   const [selectedArchives, setSelectedArchives] = useState<string[]>([]);
   const [docDateFrom, setDocDateFrom] = useState<string>('');
@@ -90,7 +102,8 @@ export default function DocumentTable({
         const storedDocTo = window.localStorage.getItem('docTable:filter:docTo');
         const storedExpFrom = window.localStorage.getItem('docTable:filter:expFrom');
         const storedExpTo = window.localStorage.getItem('docTable:filter:expTo');
-        const storedExpIn = window.localStorage.getItem('docTable:filter:expIn');
+  const storedExpIn = window.localStorage.getItem('docTable:filter:expIn');
+  const storedColumns = window.localStorage.getItem('docTable:columns');
         if (storedPage) setPage(Math.max(1, Number(storedPage)));
         if (storedSearch) setSearch(storedSearch);
         if (storedArchives) setSelectedArchives(JSON.parse(storedArchives));
@@ -99,6 +112,12 @@ export default function DocumentTable({
         if (storedExpFrom) setExpireDateFrom(storedExpFrom);
         if (storedExpTo) setExpireDateTo(storedExpTo);
         if (storedExpIn) setExpireInDays(Number(storedExpIn) || '');
+        if (storedColumns) {
+          try {
+            const parsed = JSON.parse(storedColumns);
+            setColumns((prev) => ({ ...prev, ...parsed }));
+          } catch {}
+        }
       }
     } catch {}
   }, []);
@@ -137,6 +156,11 @@ export default function DocumentTable({
       if (typeof window !== 'undefined') window.localStorage.setItem('docTable:search', search);
     } catch {}
   }, [search]);
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') window.localStorage.setItem('docTable:columns', JSON.stringify(columns));
+    } catch {}
+  }, [columns]);
   // persist filters
   useEffect(() => {
     try { if (typeof window !== 'undefined') window.localStorage.setItem('docTable:filter:archives', JSON.stringify(selectedArchives)); } catch {}
@@ -157,22 +181,21 @@ export default function DocumentTable({
     try { if (typeof window !== 'undefined') window.localStorage.setItem('docTable:filter:expIn', String(expireInDays || '')); } catch {}
   }, [expireInDays]);
 
-  // close menu on outside click / escape
+  // Close overlays on any document click EXCEPT when clicking a popover or its trigger
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      const el = containerRef.current;
-      if (!el) return;
-      const target = e.target as Node | null;
-      // Close only if clicking outside the table/card container
-      if (target && !el.contains(target)) {
-        setOpenMenuId(null);
-        setOpenFilterPanel(false);
-        setOpenArchiveFilter(false);
-        setOpenDocDateFilter(false);
-        setOpenExpireDateFilter(false);
-        setOpenExpireInFilter(false);
-        setOpenViewMenu(false);
+      const target = e.target as HTMLElement | null;
+      if (target && (target.closest('[data-popover]') || target.closest('[data-popover-trigger]'))) {
+        // Click occurred inside an active popover or its trigger; don't auto-close here
+        return;
       }
+      setOpenMenuId(null);
+      setOpenFilterPanel(false);
+      setOpenArchiveFilter(false);
+      setOpenDocDateFilter(false);
+      setOpenExpireDateFilter(false);
+      setOpenExpireInFilter(false);
+      setOpenViewMenu(false);
     }
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -374,6 +397,9 @@ export default function DocumentTable({
 
   const uniqueArchives = useMemo(() => Array.from(new Set(data.map(d => d.archive).filter(Boolean))) as string[], [data]);
 
+  type ColumnKey = keyof typeof columns;
+  const toggleColumn = (key: ColumnKey) => setColumns((prev) => ({ ...prev, [key]: !prev[key] }));
+
 
   const handleEdit = (row: DocumentRow) => {
     if (onEdit) return onEdit(row);
@@ -398,12 +424,24 @@ export default function DocumentTable({
       setOpenMenuId(null);
       setConfirmOpen(false);
       pendingDeleteRef.current = null;
+      // Tutup modal detail jika sedang terbuka
+      setDetailOpen(false);
+      setSelectedRow(null);
     }
   };
 
   const cancelConfirmDelete = () => {
     setConfirmOpen(false);
     pendingDeleteRef.current = null;
+  };
+
+  const openDetail = (row: DocumentRow) => {
+    setSelectedRow(row);
+    setDetailOpen(true);
+  };
+  const closeDetail = () => {
+    setDetailOpen(false);
+    setSelectedRow(null);
   };
 
   return (
@@ -485,11 +523,11 @@ export default function DocumentTable({
       <div className="relative flex flex-wrap items-center gap-3 mb-3">
         {/* Filter overview */}
         <div className="relative">
-          <button onClick={(e) => { e.stopPropagation(); setOpenFilterPanel((v) => !v); }} className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white transition hover:shadow-sm active:scale-95">
+          <button data-popover-trigger onClick={(e) => { e.stopPropagation(); setOpenFilterPanel((v) => !v); }} className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white transition hover:shadow-sm active:scale-95">
             <span>⚲</span> Filter document..
           </button>
           {openFilterPanel && (
-            <div className="absolute z-20 mt-2 w-72 bg-white border rounded-lg shadow-lg p-3 animate-in fade-in zoom-in" style={{ animationDuration: '120ms' }}>
+            <div data-popover className="absolute z-20 mt-2 w-72 bg-white border rounded-lg shadow-lg p-3 animate-in fade-in zoom-in" style={{ animationDuration: '120ms' }} onClick={(e) => e.stopPropagation()}>
               <div className="text-sm text-gray-700 font-medium mb-2">Applied Filters</div>
               <ul className="text-sm text-gray-700 space-y-1 mb-3">
                 {selectedArchives.length > 0 && <li>Archive: {selectedArchives.join(', ')}</li>}
@@ -510,11 +548,11 @@ export default function DocumentTable({
 
         {/* Archive filter */}
         <div className="relative">
-          <button onClick={(e) => { e.stopPropagation(); setOpenArchiveFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${selectedArchives.length ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
+          <button data-popover-trigger onClick={(e) => { e.stopPropagation(); setOpenArchiveFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${selectedArchives.length ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
             ＋ Archive {selectedArchives.length ? <span className="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-blue-600 text-white">{selectedArchives.length}</span> : null}
           </button>
           {openArchiveFilter && (
-            <div className="absolute z-20 mt-2 w-56 bg-white border rounded-lg shadow-lg p-3">
+            <div data-popover className="absolute z-20 mt-2 w-56 bg-white border rounded-lg shadow-lg p-3" onClick={(e) => e.stopPropagation()}>
               <div className="text-sm text-gray-700 font-medium mb-2">Choose archives</div>
               <div className="max-h-48 overflow-auto pr-1 space-y-2">
                 {uniqueArchives.length === 0 && <div className="text-sm text-gray-500">No archive options</div>}
@@ -541,11 +579,11 @@ export default function DocumentTable({
 
         {/* Document Date range */}
         <div className="relative">
-          <button onClick={(e) => { e.stopPropagation(); setOpenDocDateFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${(docDateFrom || docDateTo) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
+          <button data-popover-trigger onClick={(e) => { e.stopPropagation(); setOpenDocDateFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${(docDateFrom || docDateTo) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
             ＋ Document Date
           </button>
           {openDocDateFilter && (
-            <div className="absolute z-20 mt-2 w-72 bg-white border rounded-lg shadow-lg p-3">
+            <div data-popover className="absolute z-20 mt-2 w-72 bg-white border rounded-lg shadow-lg p-3" onClick={(e) => e.stopPropagation()}>
               <div className="text-sm text-gray-700 font-medium mb-2">Document Date range</div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -567,11 +605,11 @@ export default function DocumentTable({
 
         {/* Expire Date range */}
         <div className="relative">
-          <button onClick={(e) => { e.stopPropagation(); setOpenExpireDateFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${(expireDateFrom || expireDateTo) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
+          <button data-popover-trigger onClick={(e) => { e.stopPropagation(); setOpenExpireDateFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${(expireDateFrom || expireDateTo) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
             ＋ Expire Date
           </button>
           {openExpireDateFilter && (
-            <div className="absolute z-20 mt-2 w-72 bg-white border rounded-lg shadow-lg p-3">
+            <div data-popover className="absolute z-20 mt-2 w-72 bg-white border rounded-lg shadow-lg p-3" onClick={(e) => e.stopPropagation()}>
               <div className="text-sm text-gray-700 font-medium mb-2">Expire Date range</div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -594,11 +632,11 @@ export default function DocumentTable({
 
         {/* Expire In */}
         <div className="relative">
-          <button onClick={(e) => { e.stopPropagation(); setOpenExpireInFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${(expireInDays !== '' && expireInDays !== undefined && expireInDays !== null) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
+          <button data-popover-trigger onClick={(e) => { e.stopPropagation(); setOpenExpireInFilter((v) => !v); }} className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg bg-white transition hover:shadow-sm active:scale-95 ${(expireInDays !== '' && expireInDays !== undefined && expireInDays !== null) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700'}`}>
             ＋ Expire In
           </button>
           {openExpireInFilter && (
-            <div className="absolute z-20 mt-2 w-56 bg-white border rounded-lg shadow-lg p-3">
+            <div data-popover className="absolute z-20 mt-2 w-56 bg-white border rounded-lg shadow-lg p-3" onClick={(e) => e.stopPropagation()}>
               <div className="text-sm text-gray-700 font-medium mb-2">Expire within</div>
               <div className="grid grid-cols-3 gap-2 mb-2">
                 {[7, 30, 90, 180, 365].map((d) => (
@@ -619,20 +657,30 @@ export default function DocumentTable({
 
         {/* Export */}
         <div className="relative">
-          <button onClick={handleExport} className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white transition hover:shadow-sm active:scale-95">
+          <button data-popover-trigger onClick={handleExport} className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white transition hover:shadow-sm active:scale-95">
             ⬇ Export
           </button>
         </div>
 
-        {/* View menu */}
+        {/* View menu: Toggle columns */}
         <div className="relative">
-          <button onClick={(e) => { e.stopPropagation(); setOpenViewMenu((v) => !v); }} className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white transition hover:shadow-sm active:scale-95">
+          <button data-popover-trigger onClick={(e) => { e.stopPropagation(); setOpenViewMenu((v) => !v); }} className="flex items-center gap-2 px-3 py-1.5 border rounded-lg text-gray-700 bg-white transition hover:shadow-sm active:scale-95">
             ☰ View
           </button>
           {openViewMenu && (
-            <div className="absolute z-20 mt-2 w-40 bg-white border rounded-lg shadow-lg p-2">
-              <button className={`w-full text-left px-3 py-2 rounded-md ${viewMode === 'list' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'}`} onClick={() => { setViewMode('list'); setOpenViewMenu(false); }}>List</button>
-              <button className={`w-full text-left px-3 py-2 rounded-md ${viewMode === 'card' ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'}`} onClick={() => { setViewMode('card'); setOpenViewMenu(false); }}>Card</button>
+            <div data-popover className="absolute z-20 mt-2 w-60 bg-white border rounded-lg shadow-lg p-2" onClick={(e) => e.stopPropagation()}>
+              <div className="px-3 py-2 text-sm font-medium text-gray-800">Toggle columns</div>
+              <div className="py-1">
+                {[{key:'title',label:'Title'},{key:'description',label:'Description'},{key:'documentDate',label:'Document Date'},{key:'contributors',label:'Contributors'},{key:'archive',label:'Archive'},{key:'lastUpdated',label:'Last Updated'}].map(({key,label}) => (
+                  <button key={key}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 rounded-md"
+                    onClick={() => toggleColumn(key as ColumnKey)}
+                  >
+                    <span className="inline-block w-4 text-blue-600">{columns[key as ColumnKey] ? '✓' : ''}</span>
+                    <span className="text-gray-800">{label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -645,12 +693,24 @@ export default function DocumentTable({
             <thead className="bg-gray-50 text-gray-700 sticky top-0 z-10">
               <tr>
                 <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('id')}>ID <SortIcon col="id" /></th>
-                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('numberTitle')}>Number & Title <SortIcon col="numberTitle" /></th>
-                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('description')}>Description <SortIcon col="description" /></th>
-                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('documentDate')}>Document Date <SortIcon col="documentDate" /></th>
-                <th className="px-4 py-2 text-left">Contributors</th>
-                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('archive')}>Archive <SortIcon col="archive" /></th>
-                <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('updatedCreatedBy')}>Update & Create by <SortIcon col="updatedCreatedBy" /></th>
+                {columns.title && (
+                  <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('numberTitle')}>Title <SortIcon col="numberTitle" /></th>
+                )}
+                {columns.description && (
+                  <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('description')}>Description <SortIcon col="description" /></th>
+                )}
+                {columns.documentDate && (
+                  <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('documentDate')}>Document Date <SortIcon col="documentDate" /></th>
+                )}
+                {columns.contributors && (
+                  <th className="px-4 py-2 text-left">Contributors</th>
+                )}
+                {columns.archive && (
+                  <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('archive')}>Archive <SortIcon col="archive" /></th>
+                )}
+                {columns.lastUpdated && (
+                  <th className="px-4 py-2 text-left whitespace-nowrap cursor-pointer" onClick={() => toggleSort('updatedCreatedBy')}>Last Updated <SortIcon col="updatedCreatedBy" /></th>
+                )}
                 <th className="px-4 py-2 text-right"></th>
               </tr>
             </thead>
@@ -673,8 +733,9 @@ export default function DocumentTable({
               ) : (
                 viewRows.map((r) => (
                   <tr key={String(r.id)} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 align-top text-gray-700">{r.id}</td>
-                    <td className="px-4 py-2 align-top text-gray-900">
+                    <td className="px-4 py-2 align-top text-gray-700 cursor-pointer" onClick={() => openDetail(r)} title="Lihat detail" role="button">{r.id}</td>
+                    {columns.title && (
+                    <td className="px-4 py-2 align-top text-gray-900 cursor-pointer" onClick={() => openDetail(r)} title="Lihat detail" role="button">
                       {(() => {
                         const parts = (r.numberTitle ?? '').split('•');
                         const code = (parts[0] ?? '').trim();
@@ -687,45 +748,57 @@ export default function DocumentTable({
                         );
                       })()}
                     </td>
-                    <td className="px-4 py-2 align-top text-gray-700 max-w-xl">
-                      {r.description ? (
-                        <Tooltip content={r.description} placement="top">
-                          <div className="max-w-xl truncate cursor-help">{r.description}</div>
+                    )}
+                    {columns.description && (
+                      <td className="px-4 py-2 align-top text-gray-700 max-w-xl cursor-pointer" onClick={() => openDetail(r)} title="Lihat detail" role="button">
+                        {r.description ? (
+                          <Tooltip content={r.description} placement="top">
+                            <div className="max-w-xl truncate cursor-help">{r.description}</div>
+                          </Tooltip>
+                        ) : null}
+                      </td>
+                    )}
+                    {columns.documentDate && (
+                      <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap cursor-pointer" onClick={() => openDetail(r)} title="Lihat detail" role="button">{r.documentDate}</td>
+                    )}
+                    {columns.contributors && (
+                      <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap cursor-pointer" onClick={() => openDetail(r)} title="Lihat detail" role="button">
+                        <Tooltip content={(r.contributors ?? []).join(', ')} placement="top">
+                          <div className="flex flex-wrap gap-1 cursor-help">
+                            {(r.contributors ?? []).map((name, idx) => (
+                              <span key={`${r.id}-c-${idx}`} className="inline-flex items-center px-2 py-0.5 text-xs rounded-full border bg-gray-50 text-gray-700">
+                                {name}
+                              </span>
+                            ))}
+                          </div>
                         </Tooltip>
-                      ) : null}
-                    </td>
-                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">{r.documentDate}</td>
-                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">
-                      <Tooltip content={(r.contributors ?? []).join(', ')} placement="top">
-                        <div className="flex flex-wrap gap-1 cursor-help">
-                          {(r.contributors ?? []).map((name, idx) => (
-                            <span key={`${r.id}-c-${idx}`} className="inline-flex items-center px-2 py-0.5 text-xs rounded-full border bg-gray-50 text-gray-700">
-                              {name}
-                            </span>
-                          ))}
-                        </div>
-                      </Tooltip>
-                    </td>
-                    <td className="px-4 py-2 align-top text-gray-700">
-                      {r.archive ? (
-                        <span className={`inline-flex items-center px-2 py-0.5 text-xs rounded-full border ${getArchiveBadgeClasses(r.archive)}`}>
-                          {r.archive}
-                        </span>
-                      ) : null}
-                    </td>
-                    <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap">
-                      {r.updatedCreatedBy ? (
-                        <Tooltip content={`Update & Create by: ${r.updatedCreatedBy}`} placement="top">
-                          <span className="cursor-help">{r.updatedCreatedBy}</span>
-                        </Tooltip>
-                      ) : null}
-                    </td>
-                    <td className="px-4 py-2 align-top text-right relative" onClick={(e) => e.stopPropagation()}>
+                      </td>
+                    )}
+                    {columns.archive && (
+                      <td className="px-4 py-2 align-top text-gray-700 cursor-pointer" onClick={() => openDetail(r)} title="Lihat detail" role="button">
+                        {r.archive ? (
+                          <span className={`inline-flex items-center px-2 py-0.5 text-xs rounded-full border ${getArchiveBadgeClasses(r.archive)}`}>
+                            {r.archive}
+                          </span>
+                        ) : null}
+                      </td>
+                    )}
+                    {columns.lastUpdated && (
+                      <td className="px-4 py-2 align-top text-gray-700 whitespace-nowrap cursor-pointer" onClick={() => openDetail(r)} title="Lihat detail" role="button">
+                        {r.updatedCreatedBy ? (
+                          <Tooltip content={`Update & Create by: ${r.updatedCreatedBy}`} placement="top">
+                            <span className="cursor-help">{r.updatedCreatedBy}</span>
+                          </Tooltip>
+                        ) : null}
+                      </td>
+                    )}
+                    <td className="px-4 py-2 align-top text-right relative">
                       <button
+                        data-popover-trigger
                         aria-label="More actions"
                         aria-expanded={openMenuId === r.id}
                         className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                        onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
+                        onClick={(e) => { e.stopPropagation(); setOpenMenuId((id) => (id === r.id ? null : r.id)); }}
                         onKeyDown={(e) => {
                           if (e.key === 'ArrowDown') {
                             e.preventDefault();
@@ -740,7 +813,7 @@ export default function DocumentTable({
                         ⋯
                       </button>
                       {openMenuId === r.id && (
-                        <div id={`menu-list-${String(r.id)}`} className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Row actions menu"
+                        <div data-popover id={`menu-list-${String(r.id)}`} className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Row actions menu" onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => {
                             const items = Array.from((e.currentTarget.querySelectorAll('[data-menu-item]')) as NodeListOf<HTMLElement>);
                             const idx = items.findIndex((el) => el === document.activeElement);
@@ -779,7 +852,7 @@ export default function DocumentTable({
                 const code = (parts[0] ?? '').trim();
                 const label = (parts[1] ?? '').trim();
                 return (
-                  <div key={String(r.id)} className="bg-white border rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow relative" onClick={(e) => e.stopPropagation()}>
+                  <div key={String(r.id)} className="bg-white border rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow relative cursor-pointer" onClick={() => openDetail(r)} title="Lihat detail" role="button">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs px-2 py-0.5 rounded-full border text-gray-700">ID {r.id}</span>
                       <div className="flex items-center gap-2">
@@ -787,10 +860,11 @@ export default function DocumentTable({
                           <span className={`hidden sm:inline text-xs px-2 py-0.5 rounded-full border ${getArchiveBadgeClasses(r.archive)}`}>{r.archive}</span>
                         )}
                         <button
+                          data-popover-trigger
                           aria-label="More actions"
                           aria-expanded={openMenuId === r.id}
                           className="inline-flex items-center justify-center w-8 h-8 rounded-md border hover:bg-gray-100 btn-ripple btn-ellipsis-anim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                          onClick={() => setOpenMenuId((id) => (id === r.id ? null : r.id))}
+                          onClick={(e) => { e.stopPropagation(); setOpenMenuId((id) => (id === r.id ? null : r.id)); }}
                           onKeyDown={(e) => {
                             if (e.key === 'ArrowDown') {
                               e.preventDefault();
@@ -807,7 +881,7 @@ export default function DocumentTable({
                       </div>
                     </div>
                     {openMenuId === r.id && (
-                      <div id={`menu-card-${String(r.id)}`} className="absolute right-2 top-10 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Card actions menu"
+                      <div data-popover id={`menu-card-${String(r.id)}`} className="absolute right-2 top-10 w-40 bg-white border rounded-md shadow-lg z-20" role="menu" aria-label="Card actions menu" onClick={(e) => e.stopPropagation()}
                         onKeyDown={(e) => {
                           const items = Array.from((e.currentTarget.querySelectorAll('[data-menu-item]')) as NodeListOf<HTMLElement>);
                           const idx = items.findIndex((el) => el === document.activeElement);
@@ -901,6 +975,16 @@ export default function DocumentTable({
         </div>
       </div>
     </div>
+    <DocumentDetailModal
+      open={detailOpen}
+      row={selectedRow}
+      onClose={closeDetail}
+      onEdit={handleEdit}
+      onDelete={(row) => {
+        // keep detail open; confirm dialog will appear above
+        handleDelete(row);
+      }}
+    />
     <ConfirmDialog
       open={confirmOpen}
       title="Konfirmasi Hapus"
